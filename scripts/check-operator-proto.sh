@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# Copyright Istio Authors
+# Copyright 2019 Istio Authors
 
 #   Licensed under the Apache License, Version 2.0 (the "License");
 #   you may not use this file except in compliance with the License.
@@ -14,11 +14,8 @@
 #   See the License for the specific language governing permissions and
 #   limitations under the License.
 
-set -eu
-
-PATTERNS="_deepcopy.gen.go .gen.json .pb.go .pb.html _json.gen.go customresourcedefinitions.gen.yaml"
-shopt -s globstar
-
-for p in $PATTERNS; do
-    rm -f ./**/*"${p}"
-done
+buf build -o -#format=json |  jq '.file[] | select(.name == "operator/v1alpha1/operator.proto").messageType[].field[].name' -r | grep _ --color=never && {
+  echo "Found names with _ in operator; all names must be camelCase"
+  exit 1
+}
+exit 0
