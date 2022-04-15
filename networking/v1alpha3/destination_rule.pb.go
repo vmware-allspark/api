@@ -173,10 +173,10 @@
 // kind: DestinationRule
 // metadata:
 //   name: configure-client-mtls-dr-with-workloadselector
-//   workloadSelector:
-//     labels:
-//       app: ratings
 //   spec:
+//     workloadSelector:
+//       matchLabels:
+//         app: ratings
 //     trafficPolicy:
 //       loadBalancer:
 //         simple: ROUND_ROBIN
@@ -194,10 +194,10 @@
 // kind: DestinationRule
 // metadata:
 //   name: configure-client-mtls-dr-with-workloadselector
-//   workloadSelector:
-//     labels:
-//       app: ratings
 //   spec:
+//     workloadSelector:
+//       matchLabels:
+//         app: ratings
 //     trafficPolicy:
 //       loadBalancer:
 //         simple: ROUND_ROBIN
@@ -1467,8 +1467,10 @@ type ClientTLSSettings struct {
 	// Only one of client certificates and CA certificate
 	// or credentialName can be specified.
 	//
-	// **NOTE:** This field is currently applicable only at gateways.
-	// Sidecars will continue to use the certificate paths.
+	// **NOTE:** This field is applicable at sidecars only if
+	// `DestinationRule` has a `workloadSelector` specified.
+	// Otherwise the field will be applicable only at gateways, and
+	// sidecars will continue to use the certificate paths.
 	CredentialName string `protobuf:"bytes,7,opt,name=credential_name,json=credentialName,proto3" json:"credential_name,omitempty"`
 	// A list of alternate names to verify the subject identity in the
 	// certificate. If specified, the proxy will verify that the server
