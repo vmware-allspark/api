@@ -247,6 +247,9 @@
           },
           "meshMTLS": {
             "$ref": "#/components/schemas/istio.mesh.v1alpha1.MeshConfig.TLSConfig"
+          },
+          "meshExternalTLS": {
+            "$ref": "#/components/schemas/istio.mesh.v1alpha1.MeshConfig.TLSConfig"
           }
         }
       },
@@ -1151,6 +1154,10 @@
           "maxTagLength": {
             "description": "Optional. Controls the overall path length allowed in a reported span. NOTE: currently only controls max length of the path tag.",
             "type": "integer"
+          },
+          "enable64bitTraceId": {
+            "description": "Optional. A 128 bit trace id will be used in Istio. If true, will result in a 64 bit trace id being used.",
+            "type": "boolean"
           }
         }
       },
@@ -1235,6 +1242,13 @@
         "properties": {
           "minProtocolVersion": {
             "$ref": "#/components/schemas/istio.mesh.v1alpha1.MeshConfig.TLSConfig.TLSProtocol"
+          },
+          "ecdhCurves": {
+            "description": "Optional: If specified, the TLS connection will only support the specified ECDH curves for the DH key exchange. If not specified, the default curves enforced by envoy will be used. For details about the default curves, refer to [Ecdh Curves](https://www.envoyproxy.io/docs/envoy/latest/api-v3/extensions/transport_sockets/tls/v3/common.proto)",
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
           }
         }
       },
