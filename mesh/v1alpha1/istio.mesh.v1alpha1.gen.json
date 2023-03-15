@@ -57,7 +57,12 @@
         "type": "object",
         "properties": {
           "proxyListenPort": {
-            "description": "Port on which Envoy should listen for incoming connections from other services. Default port is 15001.",
+            "description": "Port on which Envoy should listen for all outbound traffic to other services. Default port is 15001.",
+            "type": "integer",
+            "format": "int32"
+          },
+          "proxyInboundListenPort": {
+            "description": "Port on which Envoy should listen for all inbound traffic to the pod/vm will be captured to. Default port is 15006. $hide_from_docs",
             "type": "integer",
             "format": "int32"
           },
@@ -180,7 +185,7 @@
             "$ref": "#/components/schemas/istio.networking.v1alpha3.LocalityLoadBalancerSetting"
           },
           "dnsRefreshRate": {
-            "description": "Configures DNS refresh rate for Envoy clusters of type `STRICT_DNS` Default refresh rate is `5s`.",
+            "description": "Configures DNS refresh rate for Envoy clusters of type `STRICT_DNS` Default refresh rate is `60s`.",
             "type": "string"
           },
           "h2UpgradePolicy": {
@@ -2140,7 +2145,7 @@
             "type": "string"
           },
           "credentialName": {
-            "description": "The name of the secret that holds the TLS certs for the client including the CA certificates. Secret must exist in the same namespace with the proxy using the certificates. The secret (of type `generic`)should contain the following keys and values: `key: \u003cprivateKey\u003e`, `cert: \u003cclientCert\u003e`, `cacert: \u003cCACertificate\u003e`. Here CACertificate is used to verify the server certificate. For mutual TLS, `cacert: \u003cCACertificate\u003e` can be provided in the same secret or a separate secret named `\u003csecret\u003e-cacert`. Secret of type tls for client certificates along with ca.crt key for CA certificates is also supported. Only one of client certificates and CA certificate or credentialName can be specified.",
+            "description": "The name of the secret that holds the TLS certs for the client including the CA certificates. This secret must exist in the namespace of the proxy using the certificates. An Opaque secret should contain the following keys and values: `key: \u003cprivateKey\u003e`, `cert: \u003cclientCert\u003e`, `cacert: \u003cCACertificate\u003e`. Here CACertificate is used to verify the server certificate. For mutual TLS, `cacert: \u003cCACertificate\u003e` can be provided in the same secret or a separate secret named `\u003csecret\u003e-cacert`. A TLS secret for client certificates with an additional `ca.crt` key for CA certificates is also supported. Only one of client certificates and CA certificate or credentialName can be specified.",
             "type": "string"
           },
           "subjectAltNames": {

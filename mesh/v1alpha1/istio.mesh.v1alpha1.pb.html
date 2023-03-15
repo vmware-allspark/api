@@ -27,8 +27,8 @@ number_of_entries: 56
 <td><code>proxyListenPort</code></td>
 <td><code>int32</code></td>
 <td>
-<p>Port on which Envoy should listen for incoming connections from
-other services. Default port is 15001.</p>
+<p>Port on which Envoy should listen for all outbound traffic to other services.
+Default port is 15001.</p>
 
 </td>
 <td>
@@ -423,7 +423,7 @@ No
 <td><code><a href="https://developers.google.com/protocol-buffers/docs/reference/google.protobuf#duration">Duration</a></code></td>
 <td>
 <p>Configures DNS refresh rate for Envoy clusters of type <code>STRICT_DNS</code>
-Default refresh rate is <code>5s</code>.</p>
+Default refresh rate is <code>60s</code>.</p>
 
 </td>
 <td>
