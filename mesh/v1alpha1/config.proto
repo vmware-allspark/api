@@ -41,7 +41,6 @@ message MeshConfig {
 
   // Port on which Envoy should listen for all inbound traffic to the pod/vm will be captured to. 
   // Default port is 15006.
-  // $hide_from_docs
   int32 proxy_inbound_listen_port = 65;
 
   // Port on which Envoy should listen for HTTP PROXY requests if set.
@@ -303,6 +302,9 @@ message MeshConfig {
   string root_namespace = 34;
 
   // Locality based load balancing distribution or failover settings.
+  // If unspecified, locality based load balancing will be enabled by default.
+  // However, this requires outlierDetection to actually take effect for a particular
+  // service, see https://istio.io/latest/docs/tasks/traffic-management/locality-load-balancing/failover/
   istio.networking.v1alpha3.LocalityLoadBalancerSetting locality_lb_setting = 35;
 
   // Configures DNS refresh rate for Envoy clusters of type `STRICT_DNS`

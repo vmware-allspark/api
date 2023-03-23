@@ -35,6 +35,18 @@ Default port is 15001.</p>
 No
 </td>
 </tr>
+<tr id="MeshConfig-proxy_inbound_listen_port">
+<td><code>proxyInboundListenPort</code></td>
+<td><code>int32</code></td>
+<td>
+<p>Port on which Envoy should listen for all inbound traffic to the pod/vm will be captured to.
+Default port is 15006.</p>
+
+</td>
+<td>
+No
+</td>
+</tr>
 <tr id="MeshConfig-proxy_http_port">
 <td><code>proxyHttpPort</code></td>
 <td><code>int32</code></td>
@@ -411,7 +423,10 @@ No
 <td><code>localityLbSetting</code></td>
 <td><code><a href="https://istio.io/docs/reference/config/networking/destination-rule.html#LocalityLoadBalancerSetting">LocalityLoadBalancerSetting</a></code></td>
 <td>
-<p>Locality based load balancing distribution or failover settings.</p>
+<p>Locality based load balancing distribution or failover settings.
+If unspecified, locality based load balancing will be enabled by default.
+However, this requires outlierDetection to actually take effect for a particular
+service, see <a href="https://istio.io/latest/docs/tasks/traffic-management/locality-load-balancing/failover/">https://istio.io/latest/docs/tasks/traffic-management/locality-load-balancing/failover/</a></p>
 
 </td>
 <td>
