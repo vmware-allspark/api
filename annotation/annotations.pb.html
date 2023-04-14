@@ -40,6 +40,8 @@ Istio supports to control its behavior.
 			
 		
 			
+		
+			
 				
 					<tr>
 				
@@ -107,6 +109,19 @@ Istio supports to control its behavior.
 				
 					<td>[AuthorizationPolicy]</td>
 					<td>Specifies whether or not the given resource is in dry-run mode. See https://istio.io/latest/docs/tasks/security/authorization/authz-dry-run/ for more information.</td>
+				</tr>
+			
+		
+			
+				
+					<tr>
+				
+					<td><code>istio.io/rev</code></td>
+				
+					<td>Alpha</td>
+				
+					<td>[Pod]</td>
+					<td>Specifies a control plane revision to which a given proxy is connected. This annotation is added automatically, not set by a user. In contrary to the label istio.io/rev, it represents the actual revision, not the requested revision.</td>
 				</tr>
 			
 		

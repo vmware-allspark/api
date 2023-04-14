@@ -132,6 +132,18 @@ var (
 		},
 	}
 
+	GatewayControllerVersion = Instance {
+		Name:          "gateway.istio.io/controller-version",
+		Description:   "A version added to the Gateway by the controller "+
+                        "specifying the `controller version`.",
+		FeatureStatus: Alpha,
+		Hidden:        true,
+		Deprecated:    false,
+		Resources: []ResourceTypes{
+			Any,
+		},
+	}
+
 	InjectTemplates = Instance {
 		Name:          "inject.istio.io/templates",
 		Description:   "The name of the inject template(s) to use, as a comma "+
@@ -228,6 +240,21 @@ var (
 		Deprecated:    false,
 		Resources: []ResourceTypes{
 			AuthorizationPolicy,
+		},
+	}
+
+	IoIstioRev = Instance {
+		Name:          "istio.io/rev",
+		Description:   "Specifies a control plane revision to which a given proxy "+
+                        "is connected. This annotation is added automatically, not "+
+                        "set by a user. In contrary to the label istio.io/rev, it "+
+                        "represents the actual revision, not the requested "+
+                        "revision.",
+		FeatureStatus: Alpha,
+		Hidden:        false,
+		Deprecated:    false,
+		Resources: []ResourceTypes{
+			Pod,
 		},
 	}
 
@@ -787,6 +814,7 @@ func AllResourceAnnotations() []*Instance {
 		&AlphaIdentity,
 		&AlphaKubernetesServiceAccounts,
 		&GalleyAnalyzeSuppress,
+		&GatewayControllerVersion,
 		&InjectTemplates,
 		&OperatorInstallChartOwner,
 		&OperatorInstallOwnerGeneration,
@@ -795,6 +823,7 @@ func AllResourceAnnotations() []*Instance {
 		&IoIstioConnectedAt,
 		&IoIstioDisconnectedAt,
 		&IoIstioDryRun,
+		&IoIstioRev,
 		&IoIstioWorkloadController,
 		&IoKubernetesIngressClass,
 		&NetworkingExportTo,
