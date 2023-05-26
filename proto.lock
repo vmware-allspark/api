@@ -36554,7 +36554,7 @@
               {
                 "id": 10,
                 "name": "priority",
-                "type": "google.protobuf.Int64Value"
+                "type": "google.protobuf.Int32Value"
               },
               {
                 "id": 11,
@@ -41566,6 +41566,26 @@
                 "id": 2,
                 "name": "authority",
                 "type": "string"
+              },
+              {
+                "id": 3,
+                "name": "uri_regex_rewrite",
+                "type": "RegexRewrite"
+              }
+            ]
+          },
+          {
+            "name": "RegexRewrite",
+            "fields": [
+              {
+                "id": 1,
+                "name": "match",
+                "type": "string"
+              },
+              {
+                "id": 2,
+                "name": "rewrite",
+                "type": "string"
               }
             ]
           },
@@ -44109,6 +44129,26 @@
               {
                 "id": 2,
                 "name": "authority",
+                "type": "string"
+              },
+              {
+                "id": 3,
+                "name": "uri_regex_rewrite",
+                "type": "RegexRewrite"
+              }
+            ]
+          },
+          {
+            "name": "RegexRewrite",
+            "fields": [
+              {
+                "id": 1,
+                "name": "match",
+                "type": "string"
+              },
+              {
+                "id": 2,
+                "name": "rewrite",
                 "type": "string"
               }
             ]
