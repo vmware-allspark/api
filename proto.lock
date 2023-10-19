@@ -36547,7 +36547,13 @@
               {
                 "id": 2,
                 "name": "url",
-                "type": "string"
+                "type": "string",
+                "options": [
+                  {
+                    "name": "(google.api.field_behavior)",
+                    "value": "REQUIRED"
+                  }
+                ]
               },
               {
                 "id": 3,
@@ -36647,7 +36653,13 @@
               {
                 "id": 1,
                 "name": "name",
-                "type": "string"
+                "type": "string",
+                "options": [
+                  {
+                    "name": "(google.api.field_behavior)",
+                    "value": "REQUIRED"
+                  }
+                ]
               },
               {
                 "id": 3,
@@ -36671,6 +36683,9 @@
           },
           {
             "path": "type/v1beta1/selector.proto"
+          },
+          {
+            "path": "google/api/field_behavior.proto"
           }
         ],
         "package": {
@@ -39752,6 +39767,11 @@
                     "id": 7,
                     "name": "use_client_protocol",
                     "type": "bool"
+                  },
+                  {
+                    "id": 8,
+                    "name": "max_concurrent_streams",
+                    "type": "int32"
                   }
                 ]
               }
@@ -40492,13 +40512,7 @@
                 "id": 1,
                 "name": "servers",
                 "type": "Server",
-                "is_repeated": true,
-                "options": [
-                  {
-                    "name": "(google.api.field_behavior)",
-                    "value": "REQUIRED"
-                  }
-                ]
+                "is_repeated": true
               }
             ],
             "maps": [
@@ -42724,6 +42738,11 @@
                     "id": 7,
                     "name": "use_client_protocol",
                     "type": "bool"
+                  },
+                  {
+                    "id": 8,
+                    "name": "max_concurrent_streams",
+                    "type": "int32"
                   }
                 ]
               }
@@ -42990,13 +43009,7 @@
                 "id": 1,
                 "name": "servers",
                 "type": "Server",
-                "is_repeated": true,
-                "options": [
-                  {
-                    "name": "(google.api.field_behavior)",
-                    "value": "REQUIRED"
-                  }
-                ]
+                "is_repeated": true
               }
             ],
             "maps": [
@@ -48247,7 +48260,13 @@
               {
                 "id": 1,
                 "name": "number",
-                "type": "uint32"
+                "type": "uint32",
+                "options": [
+                  {
+                    "name": "(google.api.field_behavior)",
+                    "value": "REQUIRED"
+                  }
+                ]
               }
             ]
           },
@@ -48275,6 +48294,11 @@
                 "type": "string"
               }
             ]
+          }
+        ],
+        "imports": [
+          {
+            "path": "google/api/field_behavior.proto"
           }
         ],
         "package": {
