@@ -1,4 +1,4 @@
-// Copyright 2018 Istio Authors
+// Copyright 2020 Istio Authors
 //
 //   Licensed under the Apache License, Version 2.0 (the "License");
 //   you may not use this file except in compliance with the License.
@@ -16,14 +16,15 @@ syntax = "proto3";
 import "google/api/field_behavior.proto";
 import "google/protobuf/duration.proto";
 import "google/protobuf/wrappers.proto";
-import "networking/v1alpha3/virtual_service.proto";
+import "networking/v1/virtual_service.proto";
 import "type/v1beta1/selector.proto";
 
-// $schema: istio.networking.v1alpha3.DestinationRule
+// $schema: istio.networking.v1.DestinationRule
 // $title: Destination Rule
 // $description: Configuration affecting load balancing, outlier detection, etc.
 // $location: https://istio.io/docs/reference/config/networking/destination-rule.html
-// $aliases: [/docs/reference/config/networking/v1alpha3/destination-rule]
+// $aliases: [/docs/reference/config/networking/v1/destination-rule]
+// $mode: none
 
 // `DestinationRule` defines policies that apply to traffic intended for a
 // service after routing has occurred. These rules specify configuration
@@ -33,7 +34,7 @@ import "type/v1beta1/selector.proto";
 // ratings service would look as follows:
 //
 // ```yaml
-// apiVersion: networking.istio.io/v1beta1
+// apiVersion: networking.istio.io/v1
 // kind: DestinationRule
 // metadata:
 //   name: bookinfo-ratings
@@ -51,7 +52,7 @@ import "type/v1beta1/selector.proto";
 // pods) with labels (version:v3).
 //
 // ```yaml
-// apiVersion: networking.istio.io/v1beta1
+// apiVersion: networking.istio.io/v1
 // kind: DestinationRule
 // metadata:
 //   name: bookinfo-ratings
@@ -78,7 +79,7 @@ import "type/v1beta1/selector.proto";
 // traffic to the port 9080.
 //
 // ```yaml
-// apiVersion: networking.istio.io/v1beta1
+// apiVersion: networking.istio.io/v1
 // kind: DestinationRule
 // metadata:
 //   name: bookinfo-ratings-port
@@ -95,41 +96,16 @@ import "type/v1beta1/selector.proto";
 //       loadBalancer:
 //         simple: ROUND_ROBIN
 // ```
-//
-// Destination Rules can be customized to specific workloads as well.
-// The following example shows how a destination rule can be applied to a
-// specific workload using the workloadSelector configuration.
-//
-// ```yaml
-// apiVersion: networking.istio.io/v1beta1
-// kind: DestinationRule
-// metadata:
-//   name: configure-client-mtls-dr-with-workloadselector
-// spec:
-//   host: example.com
-//   workloadSelector:
-//     matchLabels:
-//       app: ratings
-//   trafficPolicy:
-//     loadBalancer:
-//       simple: ROUND_ROBIN
-//     portLevelSettings:
-//     - port:
-//         number: 31443
-//       tls:
-//         credentialName: client-credential
-//         mode: MUTUAL
-// ```
-package istio.networking.v1alpha3;
+package istio.networking.v1;
 
-option go_package = "istio.io/api/networking/v1alpha3";
+option go_package = "istio.io/api/networking/v1";
 
 // DestinationRule defines policies that apply to traffic intended for a service
 // after routing has occurred.
 //
 // <!-- crd generation tags
 // +cue-gen:DestinationRule:groupName:networking.istio.io
-// +cue-gen:DestinationRule:version:v1alpha3
+// +cue-gen:DestinationRule:version:v1
 // +cue-gen:DestinationRule:annotations:helm.sh/resource-policy=keep
 // +cue-gen:DestinationRule:labels:app=istio-pilot,chart=istio,heritage=Tiller,release=istio
 // +cue-gen:DestinationRule:subresource:status
@@ -145,12 +121,12 @@ option go_package = "istio.io/api/networking/v1alpha3";
 //
 // <!-- go code generation tags
 // +kubetype-gen
-// +kubetype-gen:groupVersion=networking.istio.io/v1alpha3
+// +kubetype-gen:groupVersion=networking.istio.io/v1
 // +genclient
 // +k8s:deepcopy-gen=true
 // -->
 // <!-- istio code generation tags
-// +istio.io/sync-start
+// +istio.io/sync-from:networking/v1alpha3/destination_rule.proto
 // -->
 message DestinationRule {
   // The name of a service from the service registry. Service
