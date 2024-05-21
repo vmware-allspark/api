@@ -907,9 +907,9 @@ type ProxyConfig struct {
 	// Increase the value of this field if you find that the metrics from Envoys are truncated.
 	StatNameLength int32 `protobuf:"varint,15,opt,name=stat_name_length,json=statNameLength,proto3" json:"stat_name_length,omitempty"`
 	// The number of worker threads to run.
-	// If unset, this will be automatically determined based on CPU requests/limits.
-	// If set to 0, all cores on the machine will be used.
-	// Default is 2 worker threads.
+	// If unset, which is recommended, this will be automatically determined based on CPU requests/limits.
+	// If set to 0, all cores on the machine will be used, ignoring CPU requests or limits. This can lead to major performance
+	// issues if CPU limits are also set.
 	Concurrency *wrappers.Int32Value `protobuf:"bytes,16,opt,name=concurrency,proto3" json:"concurrency,omitempty"`
 	// Path to the proxy bootstrap template file
 	ProxyBootstrapTemplatePath string `protobuf:"bytes,17,opt,name=proxy_bootstrap_template_path,json=proxyBootstrapTemplatePath,proto3" json:"proxy_bootstrap_template_path,omitempty"`
@@ -2289,7 +2289,7 @@ type ProxyConfig_ProxyHeaders struct {
 	// If disabled, this header will not be set. If it is already present, it will be preserved.
 	// This header is enabled by default if not configured.
 	AttemptCount *ProxyConfig_ProxyHeaders_AttemptCount `protobuf:"bytes,4,opt,name=attempt_count,json=attemptCount,proto3" json:"attempt_count,omitempty"`
-	// Controls various `X-Envoy-*` headers, such as `X-Envoy-Overloaded` and `X-Envoy-Upstream-Service-Time. If enabled,
+	// Controls various `X-Envoy-*` headers, such as `X-Envoy-Overloaded` and `X-Envoy-Upstream-Service-Time`. If enabled,
 	// these headers will be included.
 	// If disabled, these headers will not be set. If they are already present, they will be preserved.
 	// See the [Envoy documentation](https://www.envoyproxy.io/docs/envoy/latest/api-v3/extensions/filters/http/router/v3/router.proto#envoy-v3-api-field-extensions-filters-http-router-v3-router-suppress-envoy-headers) for more details.

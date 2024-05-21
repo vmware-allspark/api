@@ -252,7 +252,7 @@ const (
 //	      requestPrincipals: ["*"]
 //
 // ---
-// apiVersion: networking.istio.io/v1alpha3
+// apiVersion: networking.istio.io/v1
 // kind: VirtualService
 // metadata:
 //
@@ -299,9 +299,6 @@ const (
 // +kubetype-gen:groupVersion=security.istio.io/v1beta1
 // +genclient
 // +k8s:deepcopy-gen=true
-// -->
-// <!-- istio code generation tags
-// +istio.io/sync-start
 // -->
 type RequestAuthentication struct {
 	state         protoimpl.MessageState

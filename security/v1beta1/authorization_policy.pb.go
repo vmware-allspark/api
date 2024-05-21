@@ -44,7 +44,6 @@
 // A request will be internally marked that it should be audited if there is an AUDIT policy on the workload that matches the request.
 // A separate plugin must be configured and enabled to actually fulfill the audit decision and complete the audit behavior.
 // The request will not be audited if there are no such supporting plugins enabled.
-// Currently, the only supported plugin is the [Stackdriver](https://istio.io/latest/docs/reference/config/proxy_extensions/stackdriver/) plugin.
 //
 // Here is an example of Istio Authorization Policy:
 //
@@ -286,7 +285,7 @@ const (
 	// `my-custom-authz` if the request path has prefix `/admin/`.
 	//
 	// ```yaml
-	// apiVersion: security.istio.io/v1beta1
+	// apiVersion: security.istio.io/v1
 	// kind: AuthorizationPolicy
 	// metadata:
 	//
@@ -377,9 +376,6 @@ func (AuthorizationPolicy_Action) EnumDescriptor() ([]byte, []int) {
 // +kubetype-gen:groupVersion=security.istio.io/v1beta1
 // +genclient
 // +k8s:deepcopy-gen=true
-// -->
-// <!-- istio code generation tags
-// +istio.io/sync-start
 // -->
 type AuthorizationPolicy struct {
 	state         protoimpl.MessageState
@@ -812,8 +808,8 @@ type Operation struct {
 	// - `/foo/{*}` matches `/foo/bar` but not `/foo/bar/baz`
 	// - `/foo/{**}/` matches `/foo/bar/`, `/foo/bar/baz.txt`, and `/foo//` but not `/foo/bar`
 	// - `/foo/{*}/bar/{**}` matches `/foo/buzz/bar/` and `/foo/buzz/bar/baz`
-	// - `/*/baz/{*}“ is not a valid path template since it includes `*` outside of a supported operator
-	// - `/**/baz/{*}“ is not a valid path template since it includes `**` outside of a supported operator
+	// - `/*/baz/{*}` is not a valid path template since it includes `*` outside of a supported operator
+	// - `/**/baz/{*}` is not a valid path template since it includes `**` outside of a supported operator
 	// - `/{**}/foo/{*}` is not a valid path template since `{**}` is not the last operator
 	// - `/foo/{*}.txt` is invalid since there are characters other than `{*}` in the path segment
 	//

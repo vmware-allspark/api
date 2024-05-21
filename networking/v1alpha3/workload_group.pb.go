@@ -39,7 +39,7 @@
 // `app.kubernetes.io/version` is just an arbitrary example of a label.
 //
 // ```yaml
-// apiVersion: networking.istio.io/v1beta1
+// apiVersion: networking.istio.io/v1
 // kind: WorkloadGroup
 // metadata:
 //   name: reviews
@@ -113,9 +113,6 @@ const (
 // +kubetype-gen:groupVersion=networking.istio.io/v1alpha3
 // +genclient
 // +k8s:deepcopy-gen=true
-// -->
-// <!-- istio code generation tags
-// +istio.io/sync-start
 // -->
 type WorkloadGroup struct {
 	state         protoimpl.MessageState

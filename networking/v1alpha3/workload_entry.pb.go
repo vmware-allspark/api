@@ -48,7 +48,7 @@
 // forward it to the application on localhost on the same port.
 //
 // ```yaml
-// apiVersion: networking.istio.io/v1beta1
+// apiVersion: networking.istio.io/v1
 // kind: WorkloadEntry
 // metadata:
 //   name: details-svc
@@ -67,7 +67,7 @@
 // and the associated service entry
 //
 // ```yaml
-// apiVersion: networking.istio.io/v1beta1
+// apiVersion: networking.istio.io/v1
 // kind: ServiceEntry
 // metadata:
 //   name: details-svc
@@ -94,7 +94,7 @@
 // forwarding the request.
 //
 // ```yaml
-// apiVersion: networking.istio.io/v1beta1
+// apiVersion: networking.istio.io/v1
 // kind: WorkloadEntry
 // metadata:
 //   name: details-svc
@@ -113,7 +113,7 @@
 // and the associated service entry
 //
 // ```yaml
-// apiVersion: networking.istio.io/v1beta1
+// apiVersion: networking.istio.io/v1
 // kind: ServiceEntry
 // metadata:
 //   name: details-svc
@@ -140,7 +140,7 @@
 // the actual workloads in a given remote network.
 //
 // ```yaml
-// apiVersion: networking.istio.io/v1beta1
+// apiVersion: networking.istio.io/v1
 // kind: WorkloadEntry
 // metadata:
 //   name: foo-workloads-cluster-2
@@ -190,9 +190,6 @@ const (
 // +kubetype-gen:groupVersion=networking.istio.io/v1alpha3
 // +genclient
 // +k8s:deepcopy-gen=true
-// -->
-// <!-- istio code generation tags
-// +istio.io/sync-start
 // -->
 type WorkloadEntry struct {
 	state         protoimpl.MessageState
