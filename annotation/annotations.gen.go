@@ -272,6 +272,18 @@ This takes the format: "<protocol>" or "<protocol>/<port>".
 		},
 	}
 
+	IoIstioRerouteVirtualInterfaces = Instance {
+		Name:          "istio.io/reroute-virtual-interfaces",
+		Description:   `A comma separated list of virtual interfaces whose inbound traffic will be unconditionally treated as outbound. This allows workloads using virtualized networking (kubeVirt, VMs, docker-in-docker, etc) to function correctly with mesh traffic capture.
+`,
+		FeatureStatus: Alpha,
+		Hidden:        false,
+		Deprecated:    false,
+		Resources: []ResourceTypes{
+			Pod,
+		},
+	}
+
 	IoIstioRev = Instance {
 		Name:          "istio.io/rev",
 		Description:   "Specifies a control plane revision to which a given proxy "+
@@ -493,18 +505,6 @@ Accepted values:
 		},
 	}
 
-	SidecarEnableCoreDump = Instance {
-		Name:          "sidecar.istio.io/enableCoreDump",
-		Description:   "Specifies whether or not an Envoy sidecar should enable "+
-                        "core dump.",
-		FeatureStatus: Alpha,
-		Hidden:        false,
-		Deprecated:    false,
-		Resources: []ResourceTypes{
-			Pod,
-		},
-	}
-
 	SidecarExtraStatTags = Instance {
 		Name:          "sidecar.istio.io/extraStatTags",
 		Description:   "An additional list of tags to extract from the in-proxy "+
@@ -521,8 +521,10 @@ Accepted values:
 	SidecarInject = Instance {
 		Name:          "sidecar.istio.io/inject",
 		Description:   "Specifies whether or not an Envoy sidecar should be "+
-                        "automatically injected into the workload. Deprecated in "+
-                        "favor of `sidecar.istio.io/inject` label.",
+                        "automatically injected into the workload. This annotation "+
+                        "has been deprecated in favor of the "+
+                        "`sidecar.istio.io/inject` label documented "+
+                        "[here](/docs/reference/config/labels/#SidecarInject).",
 		FeatureStatus: Beta,
 		Hidden:        false,
 		Deprecated:    true,
@@ -876,10 +878,12 @@ Accepted values:
 	SidecarTrafficKubevirtInterfaces = Instance {
 		Name:          "traffic.sidecar.istio.io/kubevirtInterfaces",
 		Description:   "A comma separated list of virtual interfaces whose "+
-                        "inbound traffic (from VM) will be treated as outbound.",
+                        "inbound traffic (from VM) will be treated as outbound. "+
+                        "Deprecated in favor of "+
+                        "`istio.io/redirect-virtual-interfaces`",
 		FeatureStatus: Alpha,
 		Hidden:        false,
-		Deprecated:    false,
+		Deprecated:    true,
 		Resources: []ResourceTypes{
 			Pod,
 		},
@@ -903,6 +907,7 @@ func AllResourceAnnotations() []*Instance {
 		&IoIstioConnectedAt,
 		&IoIstioDisconnectedAt,
 		&IoIstioDryRun,
+		&IoIstioRerouteVirtualInterfaces,
 		&IoIstioRev,
 		&IoIstioWorkloadController,
 		&IoKubernetesIngressClass,
@@ -920,7 +925,6 @@ func AllResourceAnnotations() []*Instance {
 		&SidecarBootstrapOverride,
 		&SidecarComponentLogLevel,
 		&SidecarDiscoveryAddress,
-		&SidecarEnableCoreDump,
 		&SidecarExtraStatTags,
 		&SidecarInject,
 		&SidecarInterceptionMode,
