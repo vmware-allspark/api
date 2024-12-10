@@ -131,7 +131,7 @@ var (
 Possible values: "ambient", "none".
 Note: users wishing to use sidecar mode should see the "istio-injection" label; there is no value on this label to configure sidecars.
 `,
-		FeatureStatus: Beta,
+		FeatureStatus: Stable,
 		Hidden:        false,
 		Deprecated:    false,
 		Resources: []ResourceTypes{
@@ -172,9 +172,9 @@ The waypoint is assumed to be in the same namespace; for cross-namespace, see "i
 When set or a "Pod" or a "Service", this binds that specific resource to the waypoint.
 When set on a "Namespace", this applies to all "Pod"/"Service" in the namespace.
 
-Note: the waypoint must allow the type, see "stio.io/waypoint-for".
+Note: the waypoint must allow the type, see "istio.io/waypoint-for".
 `,
-		FeatureStatus: Beta,
+		FeatureStatus: Stable,
 		Hidden:        false,
 		Deprecated:    false,
 		Resources: []ResourceTypes{
@@ -210,7 +210,7 @@ indicates the type of traffic this waypoint can handle.
 
 Valid options: "service", "workload", "all", and "none".
 `,
-		FeatureStatus: Beta,
+		FeatureStatus: Stable,
 		Hidden:        false,
 		Deprecated:    false,
 		Resources: []ResourceTypes{
