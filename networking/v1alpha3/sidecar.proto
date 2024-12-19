@@ -39,7 +39,7 @@ import "networking/v1alpha3/virtual_service.proto";
 // out unneeded configuration, to improve scalability of the mesh.
 // A common misunderstanding is that restricting the configuration amounts to *blocking* the traffic.
 // If requests are sent to destinations not included in the scoping, the traffic will be treated as
-// [unmatched traffic](docs/ops/configuration/traffic-management/traffic-routing/#unmatched-traffic), which is often still allowed.
+// [unmatched traffic](/docs/ops/configuration/traffic-management/traffic-routing/#unmatched-traffic), which is often still allowed.
 // The sidecar is not able to enforce an outbound traffic restriction (see [Egress Gateways](/docs/tasks/traffic-management/egress/egress-gateway/) for how to achieve this).
 //
 // Services and configuration in a mesh are organized into one or more
@@ -559,7 +559,7 @@ message WorkloadSelector {
 
   // $hide_from_docs
   // other forms of identification supplied by the proxy
-  // when connecting to Pilot, such as X509 fields, tenant IDs, JWT,
+  // when connecting to istiod, such as X509 fields, tenant IDs, JWT,
   // etc. This has nothing to do with the request level authN etc.
 }
 
@@ -623,7 +623,7 @@ message SidecarPort {
   uint32 number = 1;
 
   // The protocol exposed on the port.
-  // MUST BE one of HTTP|HTTPS|GRPC|HTTP2|MONGO|TCP|TLS.
+  // MUST be one of HTTP|HTTPS|GRPC|HTTP2|MONGO|TCP|TLS.
   // TLS can be either used to terminate non-HTTP based connections on a specific port
   // or to route traffic based on SNI header to the destination without terminating the TLS connection.
   string protocol = 2;

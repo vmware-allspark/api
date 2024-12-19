@@ -46,8 +46,8 @@ annotations:
   - name: networking.istio.io/exportTo
     featureStatus: Alpha
     description: Specifies the namespaces to which this service should be exported to.
-      A value of '*' indicates it is reachable within the mesh '.' indicates it is
-      reachable within its namespace.
+      A value of `*` indicates it is reachable within the mesh. `.` indicates it is
+      reachable within its namespace. '~' indicates it is hidden and exported to no namespaces. Additionally, a list of comma separated namespace names can be specified.
     deprecated: false
     hidden: false
     resources:
@@ -56,7 +56,8 @@ annotations:
   - name: sidecar.istio.io/inject
     featureStatus: Beta
     description: Specifies whether or not an Envoy sidecar should be automatically
-      injected into the workload. Deprecated in favor of `sidecar.istio.io/inject` label.
+      injected into the workload. This annotation has been deprecated in favor of the
+      `sidecar.istio.io/inject` label documented [here](/docs/reference/config/labels/#SidecarInject).
     deprecated: true
     hidden: false
     resources:
@@ -202,14 +203,6 @@ annotations:
   - name: sidecar.istio.io/userVolumeMount
     description: Specifies one or more user volume mounts (as a JSON array) to be added
       to the Envoy sidecar.
-    deprecated: false
-    hidden: false
-    resources:
-      - Pod
-
-  - name: sidecar.istio.io/enableCoreDump
-    featureStatus: Alpha
-    description: Specifies whether or not an Envoy sidecar should enable core dump.
     deprecated: false
     hidden: false
     resources:
@@ -370,8 +363,8 @@ annotations:
   - name: traffic.sidecar.istio.io/kubevirtInterfaces
     featureStatus: Alpha
     description: A comma separated list of virtual interfaces whose inbound traffic
-      (from VM) will be treated as outbound.
-    deprecated: false
+      (from VM) will be treated as outbound. Deprecated in favor of `istio.io/redirect-virtual-interfaces`
+    deprecated: true
     hidden: false
     resources:
       - Pod
@@ -578,5 +571,14 @@ annotations:
       This is intended to be used when enrolling a workload that only receives traffic from out-of-the-mesh clients, such as third party ingress controllers.
     deprecated: false
     hidden: true
+    resources:
+      - Pod
+
+  - name: istio.io/reroute-virtual-interfaces
+    featureStatus: Alpha
+    description: |
+      A comma separated list of virtual interfaces whose inbound traffic will be unconditionally treated as outbound. This allows workloads using virtualized networking (kubeVirt, VMs, docker-in-docker, etc) to function correctly with mesh traffic capture.
+    deprecated: false
+    hidden: false
     resources:
       - Pod

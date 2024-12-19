@@ -133,14 +133,14 @@ spec:
                       type: string
                       x-kubernetes-validations:
                       - message: wildcard not allowed in label value match
-                        rule: '!self.contains(''*'')'
+                        rule: '!self.contains("*")'
                     description: One or more labels that indicate a specific set of
                       pods/VMs on which a policy should be applied.
                     maxProperties: 4096
                     type: object
                     x-kubernetes-validations:
                     - message: wildcard not allowed in label key match
-                      rule: self.all(key, !key.contains('*'))
+                      rule: self.all(key, !key.contains("*"))
                     - message: key must not be empty
                       rule: self.all(key, key.size() != 0)
                 type: object
@@ -180,8 +180,9 @@ spec:
                 x-kubernetes-validations:
                 - message: Support kinds are core/Service, networking.istio.io/ServiceEntry,
                     gateway.networking.k8s.io/Gateway
-                  rule: '[self.group, self.kind] in [[''core'',''Service''], ['''',''Service''],
-                    [''gateway.networking.k8s.io'',''Gateway''], [''networking.istio.io'',''ServiceEntry'']]'
+                  rule: '[self.group, self.kind] in [["core", "Service"], ["", "Service"],
+                    ["gateway.networking.k8s.io", "Gateway"], ["networking.istio.io",
+                    "ServiceEntry"]]'
               targetRefs:
                 description: Optional.
                 items:
@@ -215,8 +216,9 @@ spec:
                   x-kubernetes-validations:
                   - message: Support kinds are core/Service, networking.istio.io/ServiceEntry,
                       gateway.networking.k8s.io/Gateway
-                    rule: '[self.group, self.kind] in [[''core'',''Service''], ['''',''Service''],
-                      [''gateway.networking.k8s.io'',''Gateway''], [''networking.istio.io'',''ServiceEntry'']]'
+                    rule: '[self.group, self.kind] in [["core", "Service"], ["", "Service"],
+                      ["gateway.networking.k8s.io", "Gateway"], ["networking.istio.io",
+                      "ServiceEntry"]]'
                 maxItems: 16
                 type: array
               type:
@@ -235,10 +237,9 @@ spec:
                 type: string
                 x-kubernetes-validations:
                 - message: url must have schema one of [http, https, file, oci]
-                  rule: 'isURL(self) ? (url(self).getScheme() in ['''', ''http'',
-                    ''https'', ''oci'', ''file'']) : (isURL(''http://'' + self) &&
-                    url(''http://'' +self).getScheme() in ['''', ''http'', ''https'',
-                    ''oci'', ''file''])'
+                  rule: |-
+                    isURL(self) ? (url(self).getScheme() in ["", "http", "https", "oci", "file"]) : (isURL("http://" + self) &&
+                    url("http://" + self).getScheme() in ["", "http", "https", "oci", "file"])
               verificationKey:
                 type: string
               vmConfig:
@@ -272,7 +273,7 @@ spec:
                       type: object
                       x-kubernetes-validations:
                       - message: value may only be set when valueFrom is INLINE
-                        rule: '(has(self.valueFrom) ? self.valueFrom : '''') != ''HOST''
+                        rule: '(has(self.valueFrom) ? self.valueFrom : "") != "HOST"
                           || !has(self.value)'
                     maxItems: 256
                     type: array
@@ -285,7 +286,8 @@ spec:
             type: object
             x-kubernetes-validations:
             - message: only one of targetRefs or selector can be set
-              rule: (has(self.selector)?1:0)+(has(self.targetRef)?1:0)+(has(self.targetRefs)?1:0)<=1
+              rule: '(has(self.selector) ? 1 : 0) + (has(self.targetRef) ? 1 : 0)
+                + (has(self.targetRefs) ? 1 : 0) <= 1'
           status:
             properties:
               conditions:
@@ -305,6 +307,12 @@ spec:
                       description: Human-readable message indicating details about
                         last transition.
                       type: string
+                    observedGeneration:
+                      anyOf:
+                      - type: integer
+                      - type: string
+                      description: Resource Generation to which the Condition refers.
+                      x-kubernetes-int-or-string: true
                     reason:
                       description: Unique, one-word, CamelCase reason for the condition's
                         last transition.
@@ -321,8 +329,6 @@ spec:
                 anyOf:
                 - type: integer
                 - type: string
-                description: Resource Generation to which the Reconciled Condition
-                  refers.
                 x-kubernetes-int-or-string: true
               validationMessages:
                 description: Includes any errors or warnings detected by Istio's analyzers.
@@ -671,9 +677,7 @@ spec:
                                     type: object
                                   type: array
                                 enabled:
-                                  description: enable locality load balancing, this
-                                    is DestinationRule-level and will override mesh
-                                    wide settings in entirety.
+                                  description: Enable locality load balancing.
                                   nullable: true
                                   type: boolean
                                 failover:
@@ -791,7 +795,7 @@ spec:
                             minHealthPercent:
                               description: Outlier detection will be enabled as long
                                 as the associated load balancing pool has at least
-                                min_health_percent hosts in healthy mode.
+                                `minHealthPercent` hosts in healthy mode.
                               format: int32
                               type: integer
                             splitExternalLocalOriginErrors:
@@ -1043,9 +1047,7 @@ spec:
                                           type: object
                                         type: array
                                       enabled:
-                                        description: enable locality load balancing,
-                                          this is DestinationRule-level and will override
-                                          mesh wide settings in entirety.
+                                        description: Enable locality load balancing.
                                         nullable: true
                                         type: boolean
                                       failover:
@@ -1167,7 +1169,7 @@ spec:
                                   minHealthPercent:
                                     description: Outlier detection will be enabled
                                       as long as the associated load balancing pool
-                                      has at least min_health_percent hosts in healthy
+                                      has at least `minHealthPercent` hosts in healthy
                                       mode.
                                     format: int32
                                     type: integer
@@ -1564,8 +1566,7 @@ spec:
                               type: object
                             type: array
                           enabled:
-                            description: enable locality load balancing, this is DestinationRule-level
-                              and will override mesh wide settings in entirety.
+                            description: Enable locality load balancing.
                             nullable: true
                             type: boolean
                           failover:
@@ -1679,7 +1680,7 @@ spec:
                         type: integer
                       minHealthPercent:
                         description: Outlier detection will be enabled as long as
-                          the associated load balancing pool has at least min_health_percent
+                          the associated load balancing pool has at least `minHealthPercent`
                           hosts in healthy mode.
                         format: int32
                         type: integer
@@ -1926,9 +1927,7 @@ spec:
                                     type: object
                                   type: array
                                 enabled:
-                                  description: enable locality load balancing, this
-                                    is DestinationRule-level and will override mesh
-                                    wide settings in entirety.
+                                  description: Enable locality load balancing.
                                   nullable: true
                                   type: boolean
                                 failover:
@@ -2046,7 +2045,7 @@ spec:
                             minHealthPercent:
                               description: Outlier detection will be enabled as long
                                 as the associated load balancing pool has at least
-                                min_health_percent hosts in healthy mode.
+                                `minHealthPercent` hosts in healthy mode.
                               format: int32
                               type: integer
                             splitExternalLocalOriginErrors:
@@ -2217,14 +2216,14 @@ spec:
                       type: string
                       x-kubernetes-validations:
                       - message: wildcard not allowed in label value match
-                        rule: '!self.contains(''*'')'
+                        rule: '!self.contains("*")'
                     description: One or more labels that indicate a specific set of
                       pods/VMs on which a policy should be applied.
                     maxProperties: 4096
                     type: object
                     x-kubernetes-validations:
                     - message: wildcard not allowed in label key match
-                      rule: self.all(key, !key.contains('*'))
+                      rule: self.all(key, !key.contains("*"))
                     - message: key must not be empty
                       rule: self.all(key, key.size() != 0)
                 type: object
@@ -2250,6 +2249,12 @@ spec:
                       description: Human-readable message indicating details about
                         last transition.
                       type: string
+                    observedGeneration:
+                      anyOf:
+                      - type: integer
+                      - type: string
+                      description: Resource Generation to which the Condition refers.
+                      x-kubernetes-int-or-string: true
                     reason:
                       description: Unique, one-word, CamelCase reason for the condition's
                         last transition.
@@ -2266,8 +2271,6 @@ spec:
                 anyOf:
                 - type: integer
                 - type: string
-                description: Resource Generation to which the Reconciled Condition
-                  refers.
                 x-kubernetes-int-or-string: true
               validationMessages:
                 description: Includes any errors or warnings detected by Istio's analyzers.
@@ -2588,9 +2591,7 @@ spec:
                                     type: object
                                   type: array
                                 enabled:
-                                  description: enable locality load balancing, this
-                                    is DestinationRule-level and will override mesh
-                                    wide settings in entirety.
+                                  description: Enable locality load balancing.
                                   nullable: true
                                   type: boolean
                                 failover:
@@ -2708,7 +2709,7 @@ spec:
                             minHealthPercent:
                               description: Outlier detection will be enabled as long
                                 as the associated load balancing pool has at least
-                                min_health_percent hosts in healthy mode.
+                                `minHealthPercent` hosts in healthy mode.
                               format: int32
                               type: integer
                             splitExternalLocalOriginErrors:
@@ -2960,9 +2961,7 @@ spec:
                                           type: object
                                         type: array
                                       enabled:
-                                        description: enable locality load balancing,
-                                          this is DestinationRule-level and will override
-                                          mesh wide settings in entirety.
+                                        description: Enable locality load balancing.
                                         nullable: true
                                         type: boolean
                                       failover:
@@ -3084,7 +3083,7 @@ spec:
                                   minHealthPercent:
                                     description: Outlier detection will be enabled
                                       as long as the associated load balancing pool
-                                      has at least min_health_percent hosts in healthy
+                                      has at least `minHealthPercent` hosts in healthy
                                       mode.
                                     format: int32
                                     type: integer
@@ -3481,8 +3480,7 @@ spec:
                               type: object
                             type: array
                           enabled:
-                            description: enable locality load balancing, this is DestinationRule-level
-                              and will override mesh wide settings in entirety.
+                            description: Enable locality load balancing.
                             nullable: true
                             type: boolean
                           failover:
@@ -3596,7 +3594,7 @@ spec:
                         type: integer
                       minHealthPercent:
                         description: Outlier detection will be enabled as long as
-                          the associated load balancing pool has at least min_health_percent
+                          the associated load balancing pool has at least `minHealthPercent`
                           hosts in healthy mode.
                         format: int32
                         type: integer
@@ -3843,9 +3841,7 @@ spec:
                                     type: object
                                   type: array
                                 enabled:
-                                  description: enable locality load balancing, this
-                                    is DestinationRule-level and will override mesh
-                                    wide settings in entirety.
+                                  description: Enable locality load balancing.
                                   nullable: true
                                   type: boolean
                                 failover:
@@ -3963,7 +3959,7 @@ spec:
                             minHealthPercent:
                               description: Outlier detection will be enabled as long
                                 as the associated load balancing pool has at least
-                                min_health_percent hosts in healthy mode.
+                                `minHealthPercent` hosts in healthy mode.
                               format: int32
                               type: integer
                             splitExternalLocalOriginErrors:
@@ -4134,14 +4130,14 @@ spec:
                       type: string
                       x-kubernetes-validations:
                       - message: wildcard not allowed in label value match
-                        rule: '!self.contains(''*'')'
+                        rule: '!self.contains("*")'
                     description: One or more labels that indicate a specific set of
                       pods/VMs on which a policy should be applied.
                     maxProperties: 4096
                     type: object
                     x-kubernetes-validations:
                     - message: wildcard not allowed in label key match
-                      rule: self.all(key, !key.contains('*'))
+                      rule: self.all(key, !key.contains("*"))
                     - message: key must not be empty
                       rule: self.all(key, key.size() != 0)
                 type: object
@@ -4167,6 +4163,12 @@ spec:
                       description: Human-readable message indicating details about
                         last transition.
                       type: string
+                    observedGeneration:
+                      anyOf:
+                      - type: integer
+                      - type: string
+                      description: Resource Generation to which the Condition refers.
+                      x-kubernetes-int-or-string: true
                     reason:
                       description: Unique, one-word, CamelCase reason for the condition's
                         last transition.
@@ -4183,8 +4185,6 @@ spec:
                 anyOf:
                 - type: integer
                 - type: string
-                description: Resource Generation to which the Reconciled Condition
-                  refers.
                 x-kubernetes-int-or-string: true
               validationMessages:
                 description: Includes any errors or warnings detected by Istio's analyzers.
@@ -4505,9 +4505,7 @@ spec:
                                     type: object
                                   type: array
                                 enabled:
-                                  description: enable locality load balancing, this
-                                    is DestinationRule-level and will override mesh
-                                    wide settings in entirety.
+                                  description: Enable locality load balancing.
                                   nullable: true
                                   type: boolean
                                 failover:
@@ -4625,7 +4623,7 @@ spec:
                             minHealthPercent:
                               description: Outlier detection will be enabled as long
                                 as the associated load balancing pool has at least
-                                min_health_percent hosts in healthy mode.
+                                `minHealthPercent` hosts in healthy mode.
                               format: int32
                               type: integer
                             splitExternalLocalOriginErrors:
@@ -4877,9 +4875,7 @@ spec:
                                           type: object
                                         type: array
                                       enabled:
-                                        description: enable locality load balancing,
-                                          this is DestinationRule-level and will override
-                                          mesh wide settings in entirety.
+                                        description: Enable locality load balancing.
                                         nullable: true
                                         type: boolean
                                       failover:
@@ -5001,7 +4997,7 @@ spec:
                                   minHealthPercent:
                                     description: Outlier detection will be enabled
                                       as long as the associated load balancing pool
-                                      has at least min_health_percent hosts in healthy
+                                      has at least `minHealthPercent` hosts in healthy
                                       mode.
                                     format: int32
                                     type: integer
@@ -5398,8 +5394,7 @@ spec:
                               type: object
                             type: array
                           enabled:
-                            description: enable locality load balancing, this is DestinationRule-level
-                              and will override mesh wide settings in entirety.
+                            description: Enable locality load balancing.
                             nullable: true
                             type: boolean
                           failover:
@@ -5513,7 +5508,7 @@ spec:
                         type: integer
                       minHealthPercent:
                         description: Outlier detection will be enabled as long as
-                          the associated load balancing pool has at least min_health_percent
+                          the associated load balancing pool has at least `minHealthPercent`
                           hosts in healthy mode.
                         format: int32
                         type: integer
@@ -5760,9 +5755,7 @@ spec:
                                     type: object
                                   type: array
                                 enabled:
-                                  description: enable locality load balancing, this
-                                    is DestinationRule-level and will override mesh
-                                    wide settings in entirety.
+                                  description: Enable locality load balancing.
                                   nullable: true
                                   type: boolean
                                 failover:
@@ -5880,7 +5873,7 @@ spec:
                             minHealthPercent:
                               description: Outlier detection will be enabled as long
                                 as the associated load balancing pool has at least
-                                min_health_percent hosts in healthy mode.
+                                `minHealthPercent` hosts in healthy mode.
                               format: int32
                               type: integer
                             splitExternalLocalOriginErrors:
@@ -6051,14 +6044,14 @@ spec:
                       type: string
                       x-kubernetes-validations:
                       - message: wildcard not allowed in label value match
-                        rule: '!self.contains(''*'')'
+                        rule: '!self.contains("*")'
                     description: One or more labels that indicate a specific set of
                       pods/VMs on which a policy should be applied.
                     maxProperties: 4096
                     type: object
                     x-kubernetes-validations:
                     - message: wildcard not allowed in label key match
-                      rule: self.all(key, !key.contains('*'))
+                      rule: self.all(key, !key.contains("*"))
                     - message: key must not be empty
                       rule: self.all(key, key.size() != 0)
                 type: object
@@ -6084,6 +6077,12 @@ spec:
                       description: Human-readable message indicating details about
                         last transition.
                       type: string
+                    observedGeneration:
+                      anyOf:
+                      - type: integer
+                      - type: string
+                      description: Resource Generation to which the Condition refers.
+                      x-kubernetes-int-or-string: true
                     reason:
                       description: Unique, one-word, CamelCase reason for the condition's
                         last transition.
@@ -6100,8 +6099,6 @@ spec:
                 anyOf:
                 - type: integer
                 - type: string
-                description: Resource Generation to which the Reconciled Condition
-                  refers.
                 x-kubernetes-int-or-string: true
               validationMessages:
                 description: Includes any errors or warnings detected by Istio's analyzers.
@@ -6309,7 +6306,7 @@ spec:
                               additionalProperties:
                                 type: string
                               description: Match on the node metadata supplied by
-                                a proxy when connecting to Istio Pilot.
+                                a proxy when connecting to istiod.
                               type: object
                             proxyVersion:
                               description: A regular expression in golang regex format
@@ -6445,8 +6442,9 @@ spec:
                   x-kubernetes-validations:
                   - message: Support kinds are core/Service, networking.istio.io/ServiceEntry,
                       gateway.networking.k8s.io/Gateway
-                    rule: '[self.group, self.kind] in [[''core'',''Service''], ['''',''Service''],
-                      [''gateway.networking.k8s.io'',''Gateway''], [''networking.istio.io'',''ServiceEntry'']]'
+                    rule: '[self.group, self.kind] in [["core", "Service"], ["", "Service"],
+                      ["gateway.networking.k8s.io", "Gateway"], ["networking.istio.io",
+                      "ServiceEntry"]]'
                 maxItems: 16
                 type: array
               workloadSelector:
@@ -6459,7 +6457,7 @@ spec:
                       type: string
                       x-kubernetes-validations:
                       - message: wildcard is not supported in selector
-                        rule: '!self.contains(''*'')'
+                        rule: '!self.contains("*")'
                     description: One or more labels that indicate a specific set of
                       pods/VMs on which the configuration should be applied.
                     maxProperties: 256
@@ -6468,7 +6466,8 @@ spec:
             type: object
             x-kubernetes-validations:
             - message: only one of targetRefs or workloadSelector can be set
-              rule: (has(self.workloadSelector)?1:0)+(has(self.targetRefs)?1:0)<=1
+              rule: '(has(self.workloadSelector) ? 1 : 0) + (has(self.targetRefs)
+                ? 1 : 0) <= 1'
           status:
             properties:
               conditions:
@@ -6488,6 +6487,12 @@ spec:
                       description: Human-readable message indicating details about
                         last transition.
                       type: string
+                    observedGeneration:
+                      anyOf:
+                      - type: integer
+                      - type: string
+                      description: Resource Generation to which the Condition refers.
+                      x-kubernetes-int-or-string: true
                     reason:
                       description: Unique, one-word, CamelCase reason for the condition's
                         last transition.
@@ -6504,8 +6509,6 @@ spec:
                 anyOf:
                 - type: integer
                 - type: string
-                description: Resource Generation to which the Reconciled Condition
-                  refers.
                 x-kubernetes-int-or-string: true
               validationMessages:
                 description: Includes any errors or warnings detected by Istio's analyzers.
@@ -6743,6 +6746,12 @@ spec:
                       description: Human-readable message indicating details about
                         last transition.
                       type: string
+                    observedGeneration:
+                      anyOf:
+                      - type: integer
+                      - type: string
+                      description: Resource Generation to which the Condition refers.
+                      x-kubernetes-int-or-string: true
                     reason:
                       description: Unique, one-word, CamelCase reason for the condition's
                         last transition.
@@ -6759,8 +6768,6 @@ spec:
                 anyOf:
                 - type: integer
                 - type: string
-                description: Resource Generation to which the Reconciled Condition
-                  refers.
                 x-kubernetes-int-or-string: true
               validationMessages:
                 description: Includes any errors or warnings detected by Istio's analyzers.
@@ -6972,6 +6979,12 @@ spec:
                       description: Human-readable message indicating details about
                         last transition.
                       type: string
+                    observedGeneration:
+                      anyOf:
+                      - type: integer
+                      - type: string
+                      description: Resource Generation to which the Condition refers.
+                      x-kubernetes-int-or-string: true
                     reason:
                       description: Unique, one-word, CamelCase reason for the condition's
                         last transition.
@@ -6988,8 +7001,6 @@ spec:
                 anyOf:
                 - type: integer
                 - type: string
-                description: Resource Generation to which the Reconciled Condition
-                  refers.
                 x-kubernetes-int-or-string: true
               validationMessages:
                 description: Includes any errors or warnings detected by Istio's analyzers.
@@ -7201,6 +7212,12 @@ spec:
                       description: Human-readable message indicating details about
                         last transition.
                       type: string
+                    observedGeneration:
+                      anyOf:
+                      - type: integer
+                      - type: string
+                      description: Resource Generation to which the Condition refers.
+                      x-kubernetes-int-or-string: true
                     reason:
                       description: Unique, one-word, CamelCase reason for the condition's
                         last transition.
@@ -7217,8 +7234,6 @@ spec:
                 anyOf:
                 - type: integer
                 - type: string
-                description: Resource Generation to which the Reconciled Condition
-                  refers.
                 x-kubernetes-int-or-string: true
               validationMessages:
                 description: Includes any errors or warnings detected by Istio's analyzers.
@@ -7318,14 +7333,14 @@ spec:
                       type: string
                       x-kubernetes-validations:
                       - message: wildcard not allowed in label value match
-                        rule: '!self.contains(''*'')'
+                        rule: '!self.contains("*")'
                     description: One or more labels that indicate a specific set of
                       pods/VMs on which a policy should be applied.
                     maxProperties: 4096
                     type: object
                     x-kubernetes-validations:
                     - message: wildcard not allowed in label key match
-                      rule: self.all(key, !key.contains('*'))
+                      rule: self.all(key, !key.contains("*"))
                     - message: key must not be empty
                       rule: self.all(key, key.size() != 0)
                 type: object
@@ -7349,6 +7364,12 @@ spec:
                       description: Human-readable message indicating details about
                         last transition.
                       type: string
+                    observedGeneration:
+                      anyOf:
+                      - type: integer
+                      - type: string
+                      description: Resource Generation to which the Condition refers.
+                      x-kubernetes-int-or-string: true
                     reason:
                       description: Unique, one-word, CamelCase reason for the condition's
                         last transition.
@@ -7365,8 +7386,6 @@ spec:
                 anyOf:
                 - type: integer
                 - type: string
-                description: Resource Generation to which the Reconciled Condition
-                  refers.
                 x-kubernetes-int-or-string: true
               validationMessages:
                 description: Includes any errors or warnings detected by Istio's analyzers.
@@ -7480,11 +7499,11 @@ spec:
                       type: string
                       x-kubernetes-validations:
                       - message: UDS must be an absolute path or abstract socket
-                        rule: 'self.startsWith(''unix://'') ? (self.substring(7,8)
-                          == ''/'' || self.substring(7,8) == ''@'') : true'
+                        rule: 'self.startsWith("unix://") ? (self.substring(7, 8)
+                          == "/" || self.substring(7, 8) == "@") : true'
                       - message: UDS may not be a dir
-                        rule: 'self.startsWith(''unix://'') ? !self.endsWith(''/'')
-                          : true'
+                        rule: 'self.startsWith("unix://") ? !self.endsWith("/") :
+                          true'
                     labels:
                       additionalProperties:
                         type: string
@@ -7513,7 +7532,7 @@ spec:
                       type: object
                       x-kubernetes-validations:
                       - message: port name must be valid
-                        rule: self.all(key, size(key) < 63 && key.matches('^[a-zA-Z0-9](?:[-a-zA-Z0-9]*[a-zA-Z0-9])?$'))
+                        rule: self.all(key, size(key) < 63 && key.matches("^[a-zA-Z0-9](?:[-a-zA-Z0-9]*[a-zA-Z0-9])?$"))
                     serviceAccount:
                       description: The service account associated with the workload
                         if a sidecar is present in the workload.
@@ -7529,7 +7548,7 @@ spec:
                   - message: Address is required
                     rule: has(self.address) || has(self.network)
                   - message: UDS may not include ports
-                    rule: '(has(self.address) && self.address.startsWith(''unix://''))
+                    rule: '(has(self.address) && self.address.startsWith("unix://"))
                       ? !has(self.ports) : true'
                 maxItems: 4096
                 type: array
@@ -7544,7 +7563,7 @@ spec:
                   type: string
                   x-kubernetes-validations:
                   - message: hostname cannot be wildcard
-                    rule: self != '*'
+                    rule: self != "*"
                 maxItems: 256
                 minItems: 1
                 type: array
@@ -7624,7 +7643,7 @@ spec:
                       type: string
                       x-kubernetes-validations:
                       - message: wildcard is not supported in selector
-                        rule: '!self.contains(''*'')'
+                        rule: '!self.contains("*")'
                     description: One or more labels that indicate a specific set of
                       pods/VMs on which the configuration should be applied.
                     maxProperties: 256
@@ -7635,18 +7654,20 @@ spec:
             type: object
             x-kubernetes-validations:
             - message: only one of WorkloadSelector or Endpoints can be set
-              rule: (has(self.workloadSelector)?1:0)+(has(self.endpoints)?1:0)<=1
+              rule: '(has(self.workloadSelector) ? 1 : 0) + (has(self.endpoints) ?
+                1 : 0) <= 1'
             - message: CIDR addresses are allowed only for NONE/STATIC resolution
                 types
-              rule: '!(has(self.addresses) && self.addresses.exists(k, k.contains(''/''))
-                && (has(self.resolution) && self.resolution != ''STATIC'' && self.resolution
-                != ''NONE''))'
+              rule: |-
+                !(has(self.addresses) && self.addresses.exists(k, k.contains("/")) && has(self.resolution) &&
+                self.resolution != "STATIC" && self.resolution != "NONE")
             - message: NONE mode cannot set endpoints
-              rule: '(!has(self.resolution) || self.resolution == ''NONE'') ? !has(self.endpoints)
+              rule: '(!has(self.resolution) || self.resolution == "NONE") ? !has(self.endpoints)
                 : true'
             - message: DNS_ROUND_ROBIN mode cannot have multiple endpoints
-              rule: '(has(self.resolution) && self.resolution == ''DNS_ROUND_ROBIN'')
-                ? (!has(self.endpoints) || size(self.endpoints) == 1) : true'
+              rule: |-
+                (has(self.resolution) && self.resolution == "DNS_ROUND_ROBIN") ? (!has(self.endpoints) ||
+                size(self.endpoints) == 1) : true
           status:
             properties:
               conditions:
@@ -7666,6 +7687,12 @@ spec:
                       description: Human-readable message indicating details about
                         last transition.
                       type: string
+                    observedGeneration:
+                      anyOf:
+                      - type: integer
+                      - type: string
+                      description: Resource Generation to which the Condition refers.
+                      x-kubernetes-int-or-string: true
                     reason:
                       description: Unique, one-word, CamelCase reason for the condition's
                         last transition.
@@ -7682,8 +7709,6 @@ spec:
                 anyOf:
                 - type: integer
                 - type: string
-                description: Resource Generation to which the Reconciled Condition
-                  refers.
                 x-kubernetes-int-or-string: true
               validationMessages:
                 description: Includes any errors or warnings detected by Istio's analyzers.
@@ -7773,11 +7798,11 @@ spec:
                       type: string
                       x-kubernetes-validations:
                       - message: UDS must be an absolute path or abstract socket
-                        rule: 'self.startsWith(''unix://'') ? (self.substring(7,8)
-                          == ''/'' || self.substring(7,8) == ''@'') : true'
+                        rule: 'self.startsWith("unix://") ? (self.substring(7, 8)
+                          == "/" || self.substring(7, 8) == "@") : true'
                       - message: UDS may not be a dir
-                        rule: 'self.startsWith(''unix://'') ? !self.endsWith(''/'')
-                          : true'
+                        rule: 'self.startsWith("unix://") ? !self.endsWith("/") :
+                          true'
                     labels:
                       additionalProperties:
                         type: string
@@ -7806,7 +7831,7 @@ spec:
                       type: object
                       x-kubernetes-validations:
                       - message: port name must be valid
-                        rule: self.all(key, size(key) < 63 && key.matches('^[a-zA-Z0-9](?:[-a-zA-Z0-9]*[a-zA-Z0-9])?$'))
+                        rule: self.all(key, size(key) < 63 && key.matches("^[a-zA-Z0-9](?:[-a-zA-Z0-9]*[a-zA-Z0-9])?$"))
                     serviceAccount:
                       description: The service account associated with the workload
                         if a sidecar is present in the workload.
@@ -7822,7 +7847,7 @@ spec:
                   - message: Address is required
                     rule: has(self.address) || has(self.network)
                   - message: UDS may not include ports
-                    rule: '(has(self.address) && self.address.startsWith(''unix://''))
+                    rule: '(has(self.address) && self.address.startsWith("unix://"))
                       ? !has(self.ports) : true'
                 maxItems: 4096
                 type: array
@@ -7837,7 +7862,7 @@ spec:
                   type: string
                   x-kubernetes-validations:
                   - message: hostname cannot be wildcard
-                    rule: self != '*'
+                    rule: self != "*"
                 maxItems: 256
                 minItems: 1
                 type: array
@@ -7917,7 +7942,7 @@ spec:
                       type: string
                       x-kubernetes-validations:
                       - message: wildcard is not supported in selector
-                        rule: '!self.contains(''*'')'
+                        rule: '!self.contains("*")'
                     description: One or more labels that indicate a specific set of
                       pods/VMs on which the configuration should be applied.
                     maxProperties: 256
@@ -7928,18 +7953,20 @@ spec:
             type: object
             x-kubernetes-validations:
             - message: only one of WorkloadSelector or Endpoints can be set
-              rule: (has(self.workloadSelector)?1:0)+(has(self.endpoints)?1:0)<=1
+              rule: '(has(self.workloadSelector) ? 1 : 0) + (has(self.endpoints) ?
+                1 : 0) <= 1'
             - message: CIDR addresses are allowed only for NONE/STATIC resolution
                 types
-              rule: '!(has(self.addresses) && self.addresses.exists(k, k.contains(''/''))
-                && (has(self.resolution) && self.resolution != ''STATIC'' && self.resolution
-                != ''NONE''))'
+              rule: |-
+                !(has(self.addresses) && self.addresses.exists(k, k.contains("/")) && has(self.resolution) &&
+                self.resolution != "STATIC" && self.resolution != "NONE")
             - message: NONE mode cannot set endpoints
-              rule: '(!has(self.resolution) || self.resolution == ''NONE'') ? !has(self.endpoints)
+              rule: '(!has(self.resolution) || self.resolution == "NONE") ? !has(self.endpoints)
                 : true'
             - message: DNS_ROUND_ROBIN mode cannot have multiple endpoints
-              rule: '(has(self.resolution) && self.resolution == ''DNS_ROUND_ROBIN'')
-                ? (!has(self.endpoints) || size(self.endpoints) == 1) : true'
+              rule: |-
+                (has(self.resolution) && self.resolution == "DNS_ROUND_ROBIN") ? (!has(self.endpoints) ||
+                size(self.endpoints) == 1) : true
           status:
             properties:
               conditions:
@@ -7959,6 +7986,12 @@ spec:
                       description: Human-readable message indicating details about
                         last transition.
                       type: string
+                    observedGeneration:
+                      anyOf:
+                      - type: integer
+                      - type: string
+                      description: Resource Generation to which the Condition refers.
+                      x-kubernetes-int-or-string: true
                     reason:
                       description: Unique, one-word, CamelCase reason for the condition's
                         last transition.
@@ -7975,8 +8008,6 @@ spec:
                 anyOf:
                 - type: integer
                 - type: string
-                description: Resource Generation to which the Reconciled Condition
-                  refers.
                 x-kubernetes-int-or-string: true
               validationMessages:
                 description: Includes any errors or warnings detected by Istio's analyzers.
@@ -8066,11 +8097,11 @@ spec:
                       type: string
                       x-kubernetes-validations:
                       - message: UDS must be an absolute path or abstract socket
-                        rule: 'self.startsWith(''unix://'') ? (self.substring(7,8)
-                          == ''/'' || self.substring(7,8) == ''@'') : true'
+                        rule: 'self.startsWith("unix://") ? (self.substring(7, 8)
+                          == "/" || self.substring(7, 8) == "@") : true'
                       - message: UDS may not be a dir
-                        rule: 'self.startsWith(''unix://'') ? !self.endsWith(''/'')
-                          : true'
+                        rule: 'self.startsWith("unix://") ? !self.endsWith("/") :
+                          true'
                     labels:
                       additionalProperties:
                         type: string
@@ -8099,7 +8130,7 @@ spec:
                       type: object
                       x-kubernetes-validations:
                       - message: port name must be valid
-                        rule: self.all(key, size(key) < 63 && key.matches('^[a-zA-Z0-9](?:[-a-zA-Z0-9]*[a-zA-Z0-9])?$'))
+                        rule: self.all(key, size(key) < 63 && key.matches("^[a-zA-Z0-9](?:[-a-zA-Z0-9]*[a-zA-Z0-9])?$"))
                     serviceAccount:
                       description: The service account associated with the workload
                         if a sidecar is present in the workload.
@@ -8115,7 +8146,7 @@ spec:
                   - message: Address is required
                     rule: has(self.address) || has(self.network)
                   - message: UDS may not include ports
-                    rule: '(has(self.address) && self.address.startsWith(''unix://''))
+                    rule: '(has(self.address) && self.address.startsWith("unix://"))
                       ? !has(self.ports) : true'
                 maxItems: 4096
                 type: array
@@ -8130,7 +8161,7 @@ spec:
                   type: string
                   x-kubernetes-validations:
                   - message: hostname cannot be wildcard
-                    rule: self != '*'
+                    rule: self != "*"
                 maxItems: 256
                 minItems: 1
                 type: array
@@ -8210,7 +8241,7 @@ spec:
                       type: string
                       x-kubernetes-validations:
                       - message: wildcard is not supported in selector
-                        rule: '!self.contains(''*'')'
+                        rule: '!self.contains("*")'
                     description: One or more labels that indicate a specific set of
                       pods/VMs on which the configuration should be applied.
                     maxProperties: 256
@@ -8221,18 +8252,20 @@ spec:
             type: object
             x-kubernetes-validations:
             - message: only one of WorkloadSelector or Endpoints can be set
-              rule: (has(self.workloadSelector)?1:0)+(has(self.endpoints)?1:0)<=1
+              rule: '(has(self.workloadSelector) ? 1 : 0) + (has(self.endpoints) ?
+                1 : 0) <= 1'
             - message: CIDR addresses are allowed only for NONE/STATIC resolution
                 types
-              rule: '!(has(self.addresses) && self.addresses.exists(k, k.contains(''/''))
-                && (has(self.resolution) && self.resolution != ''STATIC'' && self.resolution
-                != ''NONE''))'
+              rule: |-
+                !(has(self.addresses) && self.addresses.exists(k, k.contains("/")) && has(self.resolution) &&
+                self.resolution != "STATIC" && self.resolution != "NONE")
             - message: NONE mode cannot set endpoints
-              rule: '(!has(self.resolution) || self.resolution == ''NONE'') ? !has(self.endpoints)
+              rule: '(!has(self.resolution) || self.resolution == "NONE") ? !has(self.endpoints)
                 : true'
             - message: DNS_ROUND_ROBIN mode cannot have multiple endpoints
-              rule: '(has(self.resolution) && self.resolution == ''DNS_ROUND_ROBIN'')
-                ? (!has(self.endpoints) || size(self.endpoints) == 1) : true'
+              rule: |-
+                (has(self.resolution) && self.resolution == "DNS_ROUND_ROBIN") ? (!has(self.endpoints) ||
+                size(self.endpoints) == 1) : true
           status:
             properties:
               conditions:
@@ -8252,6 +8285,12 @@ spec:
                       description: Human-readable message indicating details about
                         last transition.
                       type: string
+                    observedGeneration:
+                      anyOf:
+                      - type: integer
+                      - type: string
+                      description: Resource Generation to which the Condition refers.
+                      x-kubernetes-int-or-string: true
                     reason:
                       description: Unique, one-word, CamelCase reason for the condition's
                         last transition.
@@ -8268,8 +8307,6 @@ spec:
                 anyOf:
                 - type: integer
                 - type: string
-                description: Resource Generation to which the Reconciled Condition
-                  refers.
                 x-kubernetes-int-or-string: true
               validationMessages:
                 description: Includes any errors or warnings detected by Istio's analyzers.
@@ -8790,7 +8827,7 @@ spec:
                       type: string
                       x-kubernetes-validations:
                       - message: wildcard is not supported in selector
-                        rule: '!self.contains(''*'')'
+                        rule: '!self.contains("*")'
                     description: One or more labels that indicate a specific set of
                       pods/VMs on which the configuration should be applied.
                     maxProperties: 256
@@ -8816,6 +8853,12 @@ spec:
                       description: Human-readable message indicating details about
                         last transition.
                       type: string
+                    observedGeneration:
+                      anyOf:
+                      - type: integer
+                      - type: string
+                      description: Resource Generation to which the Condition refers.
+                      x-kubernetes-int-or-string: true
                     reason:
                       description: Unique, one-word, CamelCase reason for the condition's
                         last transition.
@@ -8832,8 +8875,6 @@ spec:
                 anyOf:
                 - type: integer
                 - type: string
-                description: Resource Generation to which the Reconciled Condition
-                  refers.
                 x-kubernetes-int-or-string: true
               validationMessages:
                 description: Includes any errors or warnings detected by Istio's analyzers.
@@ -9328,7 +9369,7 @@ spec:
                       type: string
                       x-kubernetes-validations:
                       - message: wildcard is not supported in selector
-                        rule: '!self.contains(''*'')'
+                        rule: '!self.contains("*")'
                     description: One or more labels that indicate a specific set of
                       pods/VMs on which the configuration should be applied.
                     maxProperties: 256
@@ -9354,6 +9395,12 @@ spec:
                       description: Human-readable message indicating details about
                         last transition.
                       type: string
+                    observedGeneration:
+                      anyOf:
+                      - type: integer
+                      - type: string
+                      description: Resource Generation to which the Condition refers.
+                      x-kubernetes-int-or-string: true
                     reason:
                       description: Unique, one-word, CamelCase reason for the condition's
                         last transition.
@@ -9370,8 +9417,6 @@ spec:
                 anyOf:
                 - type: integer
                 - type: string
-                description: Resource Generation to which the Reconciled Condition
-                  refers.
                 x-kubernetes-int-or-string: true
               validationMessages:
                 description: Includes any errors or warnings detected by Istio's analyzers.
@@ -9866,7 +9911,7 @@ spec:
                       type: string
                       x-kubernetes-validations:
                       - message: wildcard is not supported in selector
-                        rule: '!self.contains(''*'')'
+                        rule: '!self.contains("*")'
                     description: One or more labels that indicate a specific set of
                       pods/VMs on which the configuration should be applied.
                     maxProperties: 256
@@ -9892,6 +9937,12 @@ spec:
                       description: Human-readable message indicating details about
                         last transition.
                       type: string
+                    observedGeneration:
+                      anyOf:
+                      - type: integer
+                      - type: string
+                      description: Resource Generation to which the Condition refers.
+                      x-kubernetes-int-or-string: true
                     reason:
                       description: Unique, one-word, CamelCase reason for the condition's
                         last transition.
@@ -9908,8 +9959,6 @@ spec:
                 anyOf:
                 - type: integer
                 - type: string
-                description: Resource Generation to which the Reconciled Condition
-                  refers.
                 x-kubernetes-int-or-string: true
               validationMessages:
                 description: Includes any errors or warnings detected by Istio's analyzers.
@@ -10954,6 +11003,12 @@ spec:
                       description: Human-readable message indicating details about
                         last transition.
                       type: string
+                    observedGeneration:
+                      anyOf:
+                      - type: integer
+                      - type: string
+                      description: Resource Generation to which the Condition refers.
+                      x-kubernetes-int-or-string: true
                     reason:
                       description: Unique, one-word, CamelCase reason for the condition's
                         last transition.
@@ -10970,8 +11025,6 @@ spec:
                 anyOf:
                 - type: integer
                 - type: string
-                description: Resource Generation to which the Reconciled Condition
-                  refers.
                 x-kubernetes-int-or-string: true
               validationMessages:
                 description: Includes any errors or warnings detected by Istio's analyzers.
@@ -11990,6 +12043,12 @@ spec:
                       description: Human-readable message indicating details about
                         last transition.
                       type: string
+                    observedGeneration:
+                      anyOf:
+                      - type: integer
+                      - type: string
+                      description: Resource Generation to which the Condition refers.
+                      x-kubernetes-int-or-string: true
                     reason:
                       description: Unique, one-word, CamelCase reason for the condition's
                         last transition.
@@ -12006,8 +12065,6 @@ spec:
                 anyOf:
                 - type: integer
                 - type: string
-                description: Resource Generation to which the Reconciled Condition
-                  refers.
                 x-kubernetes-int-or-string: true
               validationMessages:
                 description: Includes any errors or warnings detected by Istio's analyzers.
@@ -13026,6 +13083,12 @@ spec:
                       description: Human-readable message indicating details about
                         last transition.
                       type: string
+                    observedGeneration:
+                      anyOf:
+                      - type: integer
+                      - type: string
+                      description: Resource Generation to which the Condition refers.
+                      x-kubernetes-int-or-string: true
                     reason:
                       description: Unique, one-word, CamelCase reason for the condition's
                         last transition.
@@ -13042,8 +13105,6 @@ spec:
                 anyOf:
                 - type: integer
                 - type: string
-                description: Resource Generation to which the Reconciled Condition
-                  refers.
                 x-kubernetes-int-or-string: true
               validationMessages:
                 description: Includes any errors or warnings detected by Istio's analyzers.
@@ -13137,10 +13198,10 @@ spec:
                 type: string
                 x-kubernetes-validations:
                 - message: UDS must be an absolute path or abstract socket
-                  rule: 'self.startsWith(''unix://'') ? (self.substring(7,8) == ''/''
-                    || self.substring(7,8) == ''@'') : true'
+                  rule: 'self.startsWith("unix://") ? (self.substring(7, 8) == "/"
+                    || self.substring(7, 8) == "@") : true'
                 - message: UDS may not be a dir
-                  rule: 'self.startsWith(''unix://'') ? !self.endsWith(''/'') : true'
+                  rule: 'self.startsWith("unix://") ? !self.endsWith("/") : true'
               labels:
                 additionalProperties:
                   type: string
@@ -13169,7 +13230,7 @@ spec:
                 type: object
                 x-kubernetes-validations:
                 - message: port name must be valid
-                  rule: self.all(key, size(key) < 63 && key.matches('^[a-zA-Z0-9](?:[-a-zA-Z0-9]*[a-zA-Z0-9])?$'))
+                  rule: self.all(key, size(key) < 63 && key.matches("^[a-zA-Z0-9](?:[-a-zA-Z0-9]*[a-zA-Z0-9])?$"))
               serviceAccount:
                 description: The service account associated with the workload if a
                   sidecar is present in the workload.
@@ -13185,8 +13246,8 @@ spec:
             - message: Address is required
               rule: has(self.address) || has(self.network)
             - message: UDS may not include ports
-              rule: '(has(self.address) && self.address.startsWith(''unix://'')) ?
-                !has(self.ports) : true'
+              rule: '(has(self.address) && self.address.startsWith("unix://")) ? !has(self.ports)
+                : true'
           status:
             properties:
               conditions:
@@ -13206,6 +13267,12 @@ spec:
                       description: Human-readable message indicating details about
                         last transition.
                       type: string
+                    observedGeneration:
+                      anyOf:
+                      - type: integer
+                      - type: string
+                      description: Resource Generation to which the Condition refers.
+                      x-kubernetes-int-or-string: true
                     reason:
                       description: Unique, one-word, CamelCase reason for the condition's
                         last transition.
@@ -13222,8 +13289,6 @@ spec:
                 anyOf:
                 - type: integer
                 - type: string
-                description: Resource Generation to which the Reconciled Condition
-                  refers.
                 x-kubernetes-int-or-string: true
               validationMessages:
                 description: Includes any errors or warnings detected by Istio's analyzers.
@@ -13293,10 +13358,10 @@ spec:
                 type: string
                 x-kubernetes-validations:
                 - message: UDS must be an absolute path or abstract socket
-                  rule: 'self.startsWith(''unix://'') ? (self.substring(7,8) == ''/''
-                    || self.substring(7,8) == ''@'') : true'
+                  rule: 'self.startsWith("unix://") ? (self.substring(7, 8) == "/"
+                    || self.substring(7, 8) == "@") : true'
                 - message: UDS may not be a dir
-                  rule: 'self.startsWith(''unix://'') ? !self.endsWith(''/'') : true'
+                  rule: 'self.startsWith("unix://") ? !self.endsWith("/") : true'
               labels:
                 additionalProperties:
                   type: string
@@ -13325,7 +13390,7 @@ spec:
                 type: object
                 x-kubernetes-validations:
                 - message: port name must be valid
-                  rule: self.all(key, size(key) < 63 && key.matches('^[a-zA-Z0-9](?:[-a-zA-Z0-9]*[a-zA-Z0-9])?$'))
+                  rule: self.all(key, size(key) < 63 && key.matches("^[a-zA-Z0-9](?:[-a-zA-Z0-9]*[a-zA-Z0-9])?$"))
               serviceAccount:
                 description: The service account associated with the workload if a
                   sidecar is present in the workload.
@@ -13341,8 +13406,8 @@ spec:
             - message: Address is required
               rule: has(self.address) || has(self.network)
             - message: UDS may not include ports
-              rule: '(has(self.address) && self.address.startsWith(''unix://'')) ?
-                !has(self.ports) : true'
+              rule: '(has(self.address) && self.address.startsWith("unix://")) ? !has(self.ports)
+                : true'
           status:
             properties:
               conditions:
@@ -13362,6 +13427,12 @@ spec:
                       description: Human-readable message indicating details about
                         last transition.
                       type: string
+                    observedGeneration:
+                      anyOf:
+                      - type: integer
+                      - type: string
+                      description: Resource Generation to which the Condition refers.
+                      x-kubernetes-int-or-string: true
                     reason:
                       description: Unique, one-word, CamelCase reason for the condition's
                         last transition.
@@ -13378,8 +13449,6 @@ spec:
                 anyOf:
                 - type: integer
                 - type: string
-                description: Resource Generation to which the Reconciled Condition
-                  refers.
                 x-kubernetes-int-or-string: true
               validationMessages:
                 description: Includes any errors or warnings detected by Istio's analyzers.
@@ -13449,10 +13518,10 @@ spec:
                 type: string
                 x-kubernetes-validations:
                 - message: UDS must be an absolute path or abstract socket
-                  rule: 'self.startsWith(''unix://'') ? (self.substring(7,8) == ''/''
-                    || self.substring(7,8) == ''@'') : true'
+                  rule: 'self.startsWith("unix://") ? (self.substring(7, 8) == "/"
+                    || self.substring(7, 8) == "@") : true'
                 - message: UDS may not be a dir
-                  rule: 'self.startsWith(''unix://'') ? !self.endsWith(''/'') : true'
+                  rule: 'self.startsWith("unix://") ? !self.endsWith("/") : true'
               labels:
                 additionalProperties:
                   type: string
@@ -13481,7 +13550,7 @@ spec:
                 type: object
                 x-kubernetes-validations:
                 - message: port name must be valid
-                  rule: self.all(key, size(key) < 63 && key.matches('^[a-zA-Z0-9](?:[-a-zA-Z0-9]*[a-zA-Z0-9])?$'))
+                  rule: self.all(key, size(key) < 63 && key.matches("^[a-zA-Z0-9](?:[-a-zA-Z0-9]*[a-zA-Z0-9])?$"))
               serviceAccount:
                 description: The service account associated with the workload if a
                   sidecar is present in the workload.
@@ -13497,8 +13566,8 @@ spec:
             - message: Address is required
               rule: has(self.address) || has(self.network)
             - message: UDS may not include ports
-              rule: '(has(self.address) && self.address.startsWith(''unix://'')) ?
-                !has(self.ports) : true'
+              rule: '(has(self.address) && self.address.startsWith("unix://")) ? !has(self.ports)
+                : true'
           status:
             properties:
               conditions:
@@ -13518,6 +13587,12 @@ spec:
                       description: Human-readable message indicating details about
                         last transition.
                       type: string
+                    observedGeneration:
+                      anyOf:
+                      - type: integer
+                      - type: string
+                      description: Resource Generation to which the Condition refers.
+                      x-kubernetes-int-or-string: true
                     reason:
                       description: Unique, one-word, CamelCase reason for the condition's
                         last transition.
@@ -13534,8 +13609,6 @@ spec:
                 anyOf:
                 - type: integer
                 - type: string
-                description: Resource Generation to which the Reconciled Condition
-                  refers.
                 x-kubernetes-int-or-string: true
               validationMessages:
                 description: Includes any errors or warnings detected by Istio's analyzers.
@@ -13644,12 +13717,16 @@ spec:
                       - tcpSocket
                     - required:
                       - exec
+                    - required:
+                      - grpc
                 - required:
                   - httpGet
                 - required:
                   - tcpSocket
                 - required:
                   - exec
+                - required:
+                  - grpc
                 properties:
                   exec:
                     description: Health is determined by how the command that is executed
@@ -13670,6 +13747,21 @@ spec:
                     format: int32
                     minimum: 0
                     type: integer
+                  grpc:
+                    description: GRPC call is made and response/error is used to determine
+                      health.
+                    properties:
+                      port:
+                        description: Port on which the endpoint lives.
+                        maximum: 4294967295
+                        minimum: 0
+                        type: integer
+                        x-kubernetes-validations:
+                        - message: port must be between 1-65535
+                          rule: 0 < self && self <= 65535
+                      service:
+                        type: string
+                    type: object
                   httpGet:
                     description: '`httpGet` is performed to a given endpoint and the
                       status/able to connect determines health.'
@@ -13704,7 +13796,7 @@ spec:
                         type: string
                         x-kubernetes-validations:
                         - message: scheme must be one of [HTTP, HTTPS]
-                          rule: self in ['', 'HTTP', 'HTTPS']
+                          rule: self in ["", "HTTP", "HTTPS"]
                     required:
                     - port
                     type: object
@@ -13757,11 +13849,10 @@ spec:
                     type: string
                     x-kubernetes-validations:
                     - message: UDS must be an absolute path or abstract socket
-                      rule: 'self.startsWith(''unix://'') ? (self.substring(7,8) ==
-                        ''/'' || self.substring(7,8) == ''@'') : true'
+                      rule: 'self.startsWith("unix://") ? (self.substring(7, 8) ==
+                        "/" || self.substring(7, 8) == "@") : true'
                     - message: UDS may not be a dir
-                      rule: 'self.startsWith(''unix://'') ? !self.endsWith(''/'')
-                        : true'
+                      rule: 'self.startsWith("unix://") ? !self.endsWith("/") : true'
                   labels:
                     additionalProperties:
                       type: string
@@ -13790,7 +13881,7 @@ spec:
                     type: object
                     x-kubernetes-validations:
                     - message: port name must be valid
-                      rule: self.all(key, size(key) < 63 && key.matches('^[a-zA-Z0-9](?:[-a-zA-Z0-9]*[a-zA-Z0-9])?$'))
+                      rule: self.all(key, size(key) < 63 && key.matches("^[a-zA-Z0-9](?:[-a-zA-Z0-9]*[a-zA-Z0-9])?$"))
                   serviceAccount:
                     description: The service account associated with the workload
                       if a sidecar is present in the workload.
@@ -13804,7 +13895,7 @@ spec:
                 type: object
                 x-kubernetes-validations:
                 - message: UDS may not include ports
-                  rule: '(has(self.address) && self.address.startsWith(''unix://''))
+                  rule: '(has(self.address) && self.address.startsWith("unix://"))
                     ? !has(self.ports) : true'
             required:
             - template
@@ -13828,6 +13919,12 @@ spec:
                       description: Human-readable message indicating details about
                         last transition.
                       type: string
+                    observedGeneration:
+                      anyOf:
+                      - type: integer
+                      - type: string
+                      description: Resource Generation to which the Condition refers.
+                      x-kubernetes-int-or-string: true
                     reason:
                       description: Unique, one-word, CamelCase reason for the condition's
                         last transition.
@@ -13844,8 +13941,6 @@ spec:
                 anyOf:
                 - type: integer
                 - type: string
-                description: Resource Generation to which the Reconciled Condition
-                  refers.
                 x-kubernetes-int-or-string: true
               validationMessages:
                 description: Includes any errors or warnings detected by Istio's analyzers.
@@ -13930,12 +14025,16 @@ spec:
                       - tcpSocket
                     - required:
                       - exec
+                    - required:
+                      - grpc
                 - required:
                   - httpGet
                 - required:
                   - tcpSocket
                 - required:
                   - exec
+                - required:
+                  - grpc
                 properties:
                   exec:
                     description: Health is determined by how the command that is executed
@@ -13956,6 +14055,21 @@ spec:
                     format: int32
                     minimum: 0
                     type: integer
+                  grpc:
+                    description: GRPC call is made and response/error is used to determine
+                      health.
+                    properties:
+                      port:
+                        description: Port on which the endpoint lives.
+                        maximum: 4294967295
+                        minimum: 0
+                        type: integer
+                        x-kubernetes-validations:
+                        - message: port must be between 1-65535
+                          rule: 0 < self && self <= 65535
+                      service:
+                        type: string
+                    type: object
                   httpGet:
                     description: '`httpGet` is performed to a given endpoint and the
                       status/able to connect determines health.'
@@ -13990,7 +14104,7 @@ spec:
                         type: string
                         x-kubernetes-validations:
                         - message: scheme must be one of [HTTP, HTTPS]
-                          rule: self in ['', 'HTTP', 'HTTPS']
+                          rule: self in ["", "HTTP", "HTTPS"]
                     required:
                     - port
                     type: object
@@ -14043,11 +14157,10 @@ spec:
                     type: string
                     x-kubernetes-validations:
                     - message: UDS must be an absolute path or abstract socket
-                      rule: 'self.startsWith(''unix://'') ? (self.substring(7,8) ==
-                        ''/'' || self.substring(7,8) == ''@'') : true'
+                      rule: 'self.startsWith("unix://") ? (self.substring(7, 8) ==
+                        "/" || self.substring(7, 8) == "@") : true'
                     - message: UDS may not be a dir
-                      rule: 'self.startsWith(''unix://'') ? !self.endsWith(''/'')
-                        : true'
+                      rule: 'self.startsWith("unix://") ? !self.endsWith("/") : true'
                   labels:
                     additionalProperties:
                       type: string
@@ -14076,7 +14189,7 @@ spec:
                     type: object
                     x-kubernetes-validations:
                     - message: port name must be valid
-                      rule: self.all(key, size(key) < 63 && key.matches('^[a-zA-Z0-9](?:[-a-zA-Z0-9]*[a-zA-Z0-9])?$'))
+                      rule: self.all(key, size(key) < 63 && key.matches("^[a-zA-Z0-9](?:[-a-zA-Z0-9]*[a-zA-Z0-9])?$"))
                   serviceAccount:
                     description: The service account associated with the workload
                       if a sidecar is present in the workload.
@@ -14090,7 +14203,7 @@ spec:
                 type: object
                 x-kubernetes-validations:
                 - message: UDS may not include ports
-                  rule: '(has(self.address) && self.address.startsWith(''unix://''))
+                  rule: '(has(self.address) && self.address.startsWith("unix://"))
                     ? !has(self.ports) : true'
             required:
             - template
@@ -14114,6 +14227,12 @@ spec:
                       description: Human-readable message indicating details about
                         last transition.
                       type: string
+                    observedGeneration:
+                      anyOf:
+                      - type: integer
+                      - type: string
+                      description: Resource Generation to which the Condition refers.
+                      x-kubernetes-int-or-string: true
                     reason:
                       description: Unique, one-word, CamelCase reason for the condition's
                         last transition.
@@ -14130,8 +14249,6 @@ spec:
                 anyOf:
                 - type: integer
                 - type: string
-                description: Resource Generation to which the Reconciled Condition
-                  refers.
                 x-kubernetes-int-or-string: true
               validationMessages:
                 description: Includes any errors or warnings detected by Istio's analyzers.
@@ -14216,12 +14333,16 @@ spec:
                       - tcpSocket
                     - required:
                       - exec
+                    - required:
+                      - grpc
                 - required:
                   - httpGet
                 - required:
                   - tcpSocket
                 - required:
                   - exec
+                - required:
+                  - grpc
                 properties:
                   exec:
                     description: Health is determined by how the command that is executed
@@ -14242,6 +14363,21 @@ spec:
                     format: int32
                     minimum: 0
                     type: integer
+                  grpc:
+                    description: GRPC call is made and response/error is used to determine
+                      health.
+                    properties:
+                      port:
+                        description: Port on which the endpoint lives.
+                        maximum: 4294967295
+                        minimum: 0
+                        type: integer
+                        x-kubernetes-validations:
+                        - message: port must be between 1-65535
+                          rule: 0 < self && self <= 65535
+                      service:
+                        type: string
+                    type: object
                   httpGet:
                     description: '`httpGet` is performed to a given endpoint and the
                       status/able to connect determines health.'
@@ -14276,7 +14412,7 @@ spec:
                         type: string
                         x-kubernetes-validations:
                         - message: scheme must be one of [HTTP, HTTPS]
-                          rule: self in ['', 'HTTP', 'HTTPS']
+                          rule: self in ["", "HTTP", "HTTPS"]
                     required:
                     - port
                     type: object
@@ -14329,11 +14465,10 @@ spec:
                     type: string
                     x-kubernetes-validations:
                     - message: UDS must be an absolute path or abstract socket
-                      rule: 'self.startsWith(''unix://'') ? (self.substring(7,8) ==
-                        ''/'' || self.substring(7,8) == ''@'') : true'
+                      rule: 'self.startsWith("unix://") ? (self.substring(7, 8) ==
+                        "/" || self.substring(7, 8) == "@") : true'
                     - message: UDS may not be a dir
-                      rule: 'self.startsWith(''unix://'') ? !self.endsWith(''/'')
-                        : true'
+                      rule: 'self.startsWith("unix://") ? !self.endsWith("/") : true'
                   labels:
                     additionalProperties:
                       type: string
@@ -14362,7 +14497,7 @@ spec:
                     type: object
                     x-kubernetes-validations:
                     - message: port name must be valid
-                      rule: self.all(key, size(key) < 63 && key.matches('^[a-zA-Z0-9](?:[-a-zA-Z0-9]*[a-zA-Z0-9])?$'))
+                      rule: self.all(key, size(key) < 63 && key.matches("^[a-zA-Z0-9](?:[-a-zA-Z0-9]*[a-zA-Z0-9])?$"))
                   serviceAccount:
                     description: The service account associated with the workload
                       if a sidecar is present in the workload.
@@ -14376,7 +14511,7 @@ spec:
                 type: object
                 x-kubernetes-validations:
                 - message: UDS may not include ports
-                  rule: '(has(self.address) && self.address.startsWith(''unix://''))
+                  rule: '(has(self.address) && self.address.startsWith("unix://"))
                     ? !has(self.ports) : true'
             required:
             - template
@@ -14400,6 +14535,12 @@ spec:
                       description: Human-readable message indicating details about
                         last transition.
                       type: string
+                    observedGeneration:
+                      anyOf:
+                      - type: integer
+                      - type: string
+                      description: Resource Generation to which the Condition refers.
+                      x-kubernetes-int-or-string: true
                     reason:
                       description: Unique, one-word, CamelCase reason for the condition's
                         last transition.
@@ -14416,8 +14557,6 @@ spec:
                 anyOf:
                 - type: integer
                 - type: string
-                description: Resource Generation to which the Reconciled Condition
-                  refers.
                 x-kubernetes-int-or-string: true
               validationMessages:
                 description: Includes any errors or warnings detected by Istio's analyzers.
@@ -14578,6 +14717,13 @@ spec:
                                 items:
                                   type: string
                                 type: array
+                              notServiceAccounts:
+                                description: Optional.
+                                items:
+                                  maxLength: 320
+                                  type: string
+                                maxItems: 16
+                                type: array
                               principals:
                                 description: Optional.
                                 items:
@@ -14593,8 +14739,22 @@ spec:
                                 items:
                                   type: string
                                 type: array
+                              serviceAccounts:
+                                description: Optional.
+                                items:
+                                  maxLength: 320
+                                  type: string
+                                maxItems: 16
+                                type: array
                             type: object
+                            x-kubernetes-validations:
+                            - message: Cannot set serviceAccounts with namespaces
+                                or principals
+                              rule: |-
+                                (has(self.serviceAccounts) || has(self.notServiceAccounts)) ? (!has(self.principals) &&
+                                !has(self.notPrincipals) && !has(self.namespaces) && !has(self.notNamespaces)) : true
                         type: object
+                      maxItems: 512
                       type: array
                     to:
                       description: Optional.
@@ -14668,6 +14828,7 @@ spec:
                         type: object
                       type: array
                   type: object
+                maxItems: 512
                 type: array
               selector:
                 description: Optional.
@@ -14678,14 +14839,14 @@ spec:
                       type: string
                       x-kubernetes-validations:
                       - message: wildcard not allowed in label value match
-                        rule: '!self.contains(''*'')'
+                        rule: '!self.contains("*")'
                     description: One or more labels that indicate a specific set of
                       pods/VMs on which a policy should be applied.
                     maxProperties: 4096
                     type: object
                     x-kubernetes-validations:
                     - message: wildcard not allowed in label key match
-                      rule: self.all(key, !key.contains('*'))
+                      rule: self.all(key, !key.contains("*"))
                     - message: key must not be empty
                       rule: self.all(key, key.size() != 0)
                 type: object
@@ -14720,8 +14881,9 @@ spec:
                 x-kubernetes-validations:
                 - message: Support kinds are core/Service, networking.istio.io/ServiceEntry,
                     gateway.networking.k8s.io/Gateway
-                  rule: '[self.group, self.kind] in [[''core'',''Service''], ['''',''Service''],
-                    [''gateway.networking.k8s.io'',''Gateway''], [''networking.istio.io'',''ServiceEntry'']]'
+                  rule: '[self.group, self.kind] in [["core", "Service"], ["", "Service"],
+                    ["gateway.networking.k8s.io", "Gateway"], ["networking.istio.io",
+                    "ServiceEntry"]]'
               targetRefs:
                 description: Optional.
                 items:
@@ -14755,14 +14917,16 @@ spec:
                   x-kubernetes-validations:
                   - message: Support kinds are core/Service, networking.istio.io/ServiceEntry,
                       gateway.networking.k8s.io/Gateway
-                    rule: '[self.group, self.kind] in [[''core'',''Service''], ['''',''Service''],
-                      [''gateway.networking.k8s.io'',''Gateway''], [''networking.istio.io'',''ServiceEntry'']]'
+                    rule: '[self.group, self.kind] in [["core", "Service"], ["", "Service"],
+                      ["gateway.networking.k8s.io", "Gateway"], ["networking.istio.io",
+                      "ServiceEntry"]]'
                 maxItems: 16
                 type: array
             type: object
             x-kubernetes-validations:
             - message: only one of targetRefs or selector can be set
-              rule: (has(self.selector)?1:0)+(has(self.targetRef)?1:0)+(has(self.targetRefs)?1:0)<=1
+              rule: '(has(self.selector) ? 1 : 0) + (has(self.targetRef) ? 1 : 0)
+                + (has(self.targetRefs) ? 1 : 0) <= 1'
           status:
             properties:
               conditions:
@@ -14782,6 +14946,12 @@ spec:
                       description: Human-readable message indicating details about
                         last transition.
                       type: string
+                    observedGeneration:
+                      anyOf:
+                      - type: integer
+                      - type: string
+                      description: Resource Generation to which the Condition refers.
+                      x-kubernetes-int-or-string: true
                     reason:
                       description: Unique, one-word, CamelCase reason for the condition's
                         last transition.
@@ -14798,8 +14968,6 @@ spec:
                 anyOf:
                 - type: integer
                 - type: string
-                description: Resource Generation to which the Reconciled Condition
-                  refers.
                 x-kubernetes-int-or-string: true
               validationMessages:
                 description: Includes any errors or warnings detected by Istio's analyzers.
@@ -14931,6 +15099,13 @@ spec:
                                 items:
                                   type: string
                                 type: array
+                              notServiceAccounts:
+                                description: Optional.
+                                items:
+                                  maxLength: 320
+                                  type: string
+                                maxItems: 16
+                                type: array
                               principals:
                                 description: Optional.
                                 items:
@@ -14946,8 +15121,22 @@ spec:
                                 items:
                                   type: string
                                 type: array
+                              serviceAccounts:
+                                description: Optional.
+                                items:
+                                  maxLength: 320
+                                  type: string
+                                maxItems: 16
+                                type: array
                             type: object
+                            x-kubernetes-validations:
+                            - message: Cannot set serviceAccounts with namespaces
+                                or principals
+                              rule: |-
+                                (has(self.serviceAccounts) || has(self.notServiceAccounts)) ? (!has(self.principals) &&
+                                !has(self.notPrincipals) && !has(self.namespaces) && !has(self.notNamespaces)) : true
                         type: object
+                      maxItems: 512
                       type: array
                     to:
                       description: Optional.
@@ -15021,6 +15210,7 @@ spec:
                         type: object
                       type: array
                   type: object
+                maxItems: 512
                 type: array
               selector:
                 description: Optional.
@@ -15031,14 +15221,14 @@ spec:
                       type: string
                       x-kubernetes-validations:
                       - message: wildcard not allowed in label value match
-                        rule: '!self.contains(''*'')'
+                        rule: '!self.contains("*")'
                     description: One or more labels that indicate a specific set of
                       pods/VMs on which a policy should be applied.
                     maxProperties: 4096
                     type: object
                     x-kubernetes-validations:
                     - message: wildcard not allowed in label key match
-                      rule: self.all(key, !key.contains('*'))
+                      rule: self.all(key, !key.contains("*"))
                     - message: key must not be empty
                       rule: self.all(key, key.size() != 0)
                 type: object
@@ -15073,8 +15263,9 @@ spec:
                 x-kubernetes-validations:
                 - message: Support kinds are core/Service, networking.istio.io/ServiceEntry,
                     gateway.networking.k8s.io/Gateway
-                  rule: '[self.group, self.kind] in [[''core'',''Service''], ['''',''Service''],
-                    [''gateway.networking.k8s.io'',''Gateway''], [''networking.istio.io'',''ServiceEntry'']]'
+                  rule: '[self.group, self.kind] in [["core", "Service"], ["", "Service"],
+                    ["gateway.networking.k8s.io", "Gateway"], ["networking.istio.io",
+                    "ServiceEntry"]]'
               targetRefs:
                 description: Optional.
                 items:
@@ -15108,14 +15299,16 @@ spec:
                   x-kubernetes-validations:
                   - message: Support kinds are core/Service, networking.istio.io/ServiceEntry,
                       gateway.networking.k8s.io/Gateway
-                    rule: '[self.group, self.kind] in [[''core'',''Service''], ['''',''Service''],
-                      [''gateway.networking.k8s.io'',''Gateway''], [''networking.istio.io'',''ServiceEntry'']]'
+                    rule: '[self.group, self.kind] in [["core", "Service"], ["", "Service"],
+                      ["gateway.networking.k8s.io", "Gateway"], ["networking.istio.io",
+                      "ServiceEntry"]]'
                 maxItems: 16
                 type: array
             type: object
             x-kubernetes-validations:
             - message: only one of targetRefs or selector can be set
-              rule: (has(self.selector)?1:0)+(has(self.targetRef)?1:0)+(has(self.targetRefs)?1:0)<=1
+              rule: '(has(self.selector) ? 1 : 0) + (has(self.targetRef) ? 1 : 0)
+                + (has(self.targetRefs) ? 1 : 0) <= 1'
           status:
             properties:
               conditions:
@@ -15135,6 +15328,12 @@ spec:
                       description: Human-readable message indicating details about
                         last transition.
                       type: string
+                    observedGeneration:
+                      anyOf:
+                      - type: integer
+                      - type: string
+                      description: Resource Generation to which the Condition refers.
+                      x-kubernetes-int-or-string: true
                     reason:
                       description: Unique, one-word, CamelCase reason for the condition's
                         last transition.
@@ -15151,8 +15350,6 @@ spec:
                 anyOf:
                 - type: integer
                 - type: string
-                description: Resource Generation to which the Reconciled Condition
-                  refers.
                 x-kubernetes-int-or-string: true
               validationMessages:
                 description: Includes any errors or warnings detected by Istio's analyzers.
@@ -15286,22 +15483,23 @@ spec:
                       type: string
                       x-kubernetes-validations:
                       - message: wildcard not allowed in label value match
-                        rule: '!self.contains(''*'')'
+                        rule: '!self.contains("*")'
                     description: One or more labels that indicate a specific set of
                       pods/VMs on which a policy should be applied.
                     maxProperties: 4096
                     type: object
                     x-kubernetes-validations:
                     - message: wildcard not allowed in label key match
-                      rule: self.all(key, !key.contains('*'))
+                      rule: self.all(key, !key.contains("*"))
                     - message: key must not be empty
                       rule: self.all(key, key.size() != 0)
                 type: object
             type: object
             x-kubernetes-validations:
             - message: portLevelMtls requires selector
-              rule: (has(self.selector) && has(self.selector.matchLabels) && self.selector.matchLabels.size()
-                > 0) || !has(self.portLevelMtls)
+              rule: |-
+                has(self.selector) && has(self.selector.matchLabels) && self.selector.matchLabels.size() > 0 ||
+                !has(self.portLevelMtls)
           status:
             properties:
               conditions:
@@ -15321,6 +15519,12 @@ spec:
                       description: Human-readable message indicating details about
                         last transition.
                       type: string
+                    observedGeneration:
+                      anyOf:
+                      - type: integer
+                      - type: string
+                      description: Resource Generation to which the Condition refers.
+                      x-kubernetes-int-or-string: true
                     reason:
                       description: Unique, one-word, CamelCase reason for the condition's
                         last transition.
@@ -15337,8 +15541,6 @@ spec:
                 anyOf:
                 - type: integer
                 - type: string
-                description: Resource Generation to which the Reconciled Condition
-                  refers.
                 x-kubernetes-int-or-string: true
               validationMessages:
                 description: Includes any errors or warnings detected by Istio's analyzers.
@@ -15445,22 +15647,23 @@ spec:
                       type: string
                       x-kubernetes-validations:
                       - message: wildcard not allowed in label value match
-                        rule: '!self.contains(''*'')'
+                        rule: '!self.contains("*")'
                     description: One or more labels that indicate a specific set of
                       pods/VMs on which a policy should be applied.
                     maxProperties: 4096
                     type: object
                     x-kubernetes-validations:
                     - message: wildcard not allowed in label key match
-                      rule: self.all(key, !key.contains('*'))
+                      rule: self.all(key, !key.contains("*"))
                     - message: key must not be empty
                       rule: self.all(key, key.size() != 0)
                 type: object
             type: object
             x-kubernetes-validations:
             - message: portLevelMtls requires selector
-              rule: (has(self.selector) && has(self.selector.matchLabels) && self.selector.matchLabels.size()
-                > 0) || !has(self.portLevelMtls)
+              rule: |-
+                has(self.selector) && has(self.selector.matchLabels) && self.selector.matchLabels.size() > 0 ||
+                !has(self.portLevelMtls)
           status:
             properties:
               conditions:
@@ -15480,6 +15683,12 @@ spec:
                       description: Human-readable message indicating details about
                         last transition.
                       type: string
+                    observedGeneration:
+                      anyOf:
+                      - type: integer
+                      - type: string
+                      description: Resource Generation to which the Condition refers.
+                      x-kubernetes-int-or-string: true
                     reason:
                       description: Unique, one-word, CamelCase reason for the condition's
                         last transition.
@@ -15496,8 +15705,6 @@ spec:
                 anyOf:
                 - type: integer
                 - type: string
-                description: Resource Generation to which the Reconciled Condition
-                  refers.
                 x-kubernetes-int-or-string: true
               validationMessages:
                 description: Includes any errors or warnings detected by Istio's analyzers.
@@ -15632,7 +15839,7 @@ spec:
                       type: string
                       x-kubernetes-validations:
                       - message: url must have scheme http:// or https://
-                        rule: url(self).getScheme() in ['http', 'https']
+                        rule: url(self).getScheme() in ["http", "https"]
                     jwksUri:
                       description: URL of the provider's public key set to validate
                         signature of the JWT.
@@ -15641,7 +15848,7 @@ spec:
                       type: string
                       x-kubernetes-validations:
                       - message: url must have scheme http:// or https://
-                        rule: url(self).getScheme() in ['http', 'https']
+                        rule: url(self).getScheme() in ["http", "https"]
                     outputClaimToHeaders:
                       description: This field specifies a list of operations to copy
                         the claim to HTTP headers on a successfully verified token.
@@ -15678,7 +15885,8 @@ spec:
                   type: object
                   x-kubernetes-validations:
                   - message: only one of jwks or jwksUri can be set
-                    rule: (has(self.jwksUri)?1:0)+(has(self.jwks_uri)?1:0)+(has(self.jwks)?1:0)<=1
+                    rule: '(has(self.jwksUri) ? 1 : 0) + (has(self.jwks_uri) ? 1 :
+                      0) + (has(self.jwks) ? 1 : 0) <= 1'
                 maxItems: 4096
                 type: array
               selector:
@@ -15690,14 +15898,14 @@ spec:
                       type: string
                       x-kubernetes-validations:
                       - message: wildcard not allowed in label value match
-                        rule: '!self.contains(''*'')'
+                        rule: '!self.contains("*")'
                     description: One or more labels that indicate a specific set of
                       pods/VMs on which a policy should be applied.
                     maxProperties: 4096
                     type: object
                     x-kubernetes-validations:
                     - message: wildcard not allowed in label key match
-                      rule: self.all(key, !key.contains('*'))
+                      rule: self.all(key, !key.contains("*"))
                     - message: key must not be empty
                       rule: self.all(key, key.size() != 0)
                 type: object
@@ -15732,8 +15940,9 @@ spec:
                 x-kubernetes-validations:
                 - message: Support kinds are core/Service, networking.istio.io/ServiceEntry,
                     gateway.networking.k8s.io/Gateway
-                  rule: '[self.group, self.kind] in [[''core'',''Service''], ['''',''Service''],
-                    [''gateway.networking.k8s.io'',''Gateway''], [''networking.istio.io'',''ServiceEntry'']]'
+                  rule: '[self.group, self.kind] in [["core", "Service"], ["", "Service"],
+                    ["gateway.networking.k8s.io", "Gateway"], ["networking.istio.io",
+                    "ServiceEntry"]]'
               targetRefs:
                 description: Optional.
                 items:
@@ -15767,14 +15976,16 @@ spec:
                   x-kubernetes-validations:
                   - message: Support kinds are core/Service, networking.istio.io/ServiceEntry,
                       gateway.networking.k8s.io/Gateway
-                    rule: '[self.group, self.kind] in [[''core'',''Service''], ['''',''Service''],
-                      [''gateway.networking.k8s.io'',''Gateway''], [''networking.istio.io'',''ServiceEntry'']]'
+                    rule: '[self.group, self.kind] in [["core", "Service"], ["", "Service"],
+                      ["gateway.networking.k8s.io", "Gateway"], ["networking.istio.io",
+                      "ServiceEntry"]]'
                 maxItems: 16
                 type: array
             type: object
             x-kubernetes-validations:
             - message: only one of targetRefs or selector can be set
-              rule: (has(self.selector)?1:0)+(has(self.targetRef)?1:0)+(has(self.targetRefs)?1:0)<=1
+              rule: '(has(self.selector) ? 1 : 0) + (has(self.targetRef) ? 1 : 0)
+                + (has(self.targetRefs) ? 1 : 0) <= 1'
           status:
             properties:
               conditions:
@@ -15794,6 +16005,12 @@ spec:
                       description: Human-readable message indicating details about
                         last transition.
                       type: string
+                    observedGeneration:
+                      anyOf:
+                      - type: integer
+                      - type: string
+                      description: Resource Generation to which the Condition refers.
+                      x-kubernetes-int-or-string: true
                     reason:
                       description: Unique, one-word, CamelCase reason for the condition's
                         last transition.
@@ -15810,8 +16027,6 @@ spec:
                 anyOf:
                 - type: integer
                 - type: string
-                description: Resource Generation to which the Reconciled Condition
-                  refers.
                 x-kubernetes-int-or-string: true
               validationMessages:
                 description: Includes any errors or warnings detected by Istio's analyzers.
@@ -15919,7 +16134,7 @@ spec:
                       type: string
                       x-kubernetes-validations:
                       - message: url must have scheme http:// or https://
-                        rule: url(self).getScheme() in ['http', 'https']
+                        rule: url(self).getScheme() in ["http", "https"]
                     jwksUri:
                       description: URL of the provider's public key set to validate
                         signature of the JWT.
@@ -15928,7 +16143,7 @@ spec:
                       type: string
                       x-kubernetes-validations:
                       - message: url must have scheme http:// or https://
-                        rule: url(self).getScheme() in ['http', 'https']
+                        rule: url(self).getScheme() in ["http", "https"]
                     outputClaimToHeaders:
                       description: This field specifies a list of operations to copy
                         the claim to HTTP headers on a successfully verified token.
@@ -15965,7 +16180,8 @@ spec:
                   type: object
                   x-kubernetes-validations:
                   - message: only one of jwks or jwksUri can be set
-                    rule: (has(self.jwksUri)?1:0)+(has(self.jwks_uri)?1:0)+(has(self.jwks)?1:0)<=1
+                    rule: '(has(self.jwksUri) ? 1 : 0) + (has(self.jwks_uri) ? 1 :
+                      0) + (has(self.jwks) ? 1 : 0) <= 1'
                 maxItems: 4096
                 type: array
               selector:
@@ -15977,14 +16193,14 @@ spec:
                       type: string
                       x-kubernetes-validations:
                       - message: wildcard not allowed in label value match
-                        rule: '!self.contains(''*'')'
+                        rule: '!self.contains("*")'
                     description: One or more labels that indicate a specific set of
                       pods/VMs on which a policy should be applied.
                     maxProperties: 4096
                     type: object
                     x-kubernetes-validations:
                     - message: wildcard not allowed in label key match
-                      rule: self.all(key, !key.contains('*'))
+                      rule: self.all(key, !key.contains("*"))
                     - message: key must not be empty
                       rule: self.all(key, key.size() != 0)
                 type: object
@@ -16019,8 +16235,9 @@ spec:
                 x-kubernetes-validations:
                 - message: Support kinds are core/Service, networking.istio.io/ServiceEntry,
                     gateway.networking.k8s.io/Gateway
-                  rule: '[self.group, self.kind] in [[''core'',''Service''], ['''',''Service''],
-                    [''gateway.networking.k8s.io'',''Gateway''], [''networking.istio.io'',''ServiceEntry'']]'
+                  rule: '[self.group, self.kind] in [["core", "Service"], ["", "Service"],
+                    ["gateway.networking.k8s.io", "Gateway"], ["networking.istio.io",
+                    "ServiceEntry"]]'
               targetRefs:
                 description: Optional.
                 items:
@@ -16054,14 +16271,16 @@ spec:
                   x-kubernetes-validations:
                   - message: Support kinds are core/Service, networking.istio.io/ServiceEntry,
                       gateway.networking.k8s.io/Gateway
-                    rule: '[self.group, self.kind] in [[''core'',''Service''], ['''',''Service''],
-                      [''gateway.networking.k8s.io'',''Gateway''], [''networking.istio.io'',''ServiceEntry'']]'
+                    rule: '[self.group, self.kind] in [["core", "Service"], ["", "Service"],
+                      ["gateway.networking.k8s.io", "Gateway"], ["networking.istio.io",
+                      "ServiceEntry"]]'
                 maxItems: 16
                 type: array
             type: object
             x-kubernetes-validations:
             - message: only one of targetRefs or selector can be set
-              rule: (has(self.selector)?1:0)+(has(self.targetRef)?1:0)+(has(self.targetRefs)?1:0)<=1
+              rule: '(has(self.selector) ? 1 : 0) + (has(self.targetRef) ? 1 : 0)
+                + (has(self.targetRefs) ? 1 : 0) <= 1'
           status:
             properties:
               conditions:
@@ -16081,6 +16300,12 @@ spec:
                       description: Human-readable message indicating details about
                         last transition.
                       type: string
+                    observedGeneration:
+                      anyOf:
+                      - type: integer
+                      - type: string
+                      description: Resource Generation to which the Condition refers.
+                      x-kubernetes-int-or-string: true
                     reason:
                       description: Unique, one-word, CamelCase reason for the condition's
                         last transition.
@@ -16097,8 +16322,6 @@ spec:
                 anyOf:
                 - type: integer
                 - type: string
-                description: Resource Generation to which the Reconciled Condition
-                  refers.
                 x-kubernetes-int-or-string: true
               validationMessages:
                 description: Includes any errors or warnings detected by Istio's analyzers.
@@ -16305,11 +16528,11 @@ spec:
                               type: object
                               x-kubernetes-validations:
                               - message: value must be set when operation is UPSERT
-                                rule: '((has(self.operation) ? self.operation : '''')
-                                  == ''UPSERT'') ? self.value != '''' : true'
+                                rule: '((has(self.operation) ? self.operation : "")
+                                  == "UPSERT") ? (self.value != "") : true'
                               - message: value must not be set when operation is REMOVE
-                                rule: '((has(self.operation) ? self.operation : '''')
-                                  == ''REMOVE'') ? !has(self.value) : true'
+                                rule: '((has(self.operation) ? self.operation : "")
+                                  == "REMOVE") ? !has(self.value) : true'
                             description: Optional.
                             type: object
                         type: object
@@ -16343,14 +16566,14 @@ spec:
                       type: string
                       x-kubernetes-validations:
                       - message: wildcard not allowed in label value match
-                        rule: '!self.contains(''*'')'
+                        rule: '!self.contains("*")'
                     description: One or more labels that indicate a specific set of
                       pods/VMs on which a policy should be applied.
                     maxProperties: 4096
                     type: object
                     x-kubernetes-validations:
                     - message: wildcard not allowed in label key match
-                      rule: self.all(key, !key.contains('*'))
+                      rule: self.all(key, !key.contains("*"))
                     - message: key must not be empty
                       rule: self.all(key, key.size() != 0)
                 type: object
@@ -16385,8 +16608,9 @@ spec:
                 x-kubernetes-validations:
                 - message: Support kinds are core/Service, networking.istio.io/ServiceEntry,
                     gateway.networking.k8s.io/Gateway
-                  rule: '[self.group, self.kind] in [[''core'',''Service''], ['''',''Service''],
-                    [''gateway.networking.k8s.io'',''Gateway''], [''networking.istio.io'',''ServiceEntry'']]'
+                  rule: '[self.group, self.kind] in [["core", "Service"], ["", "Service"],
+                    ["gateway.networking.k8s.io", "Gateway"], ["networking.istio.io",
+                    "ServiceEntry"]]'
               targetRefs:
                 description: Optional.
                 items:
@@ -16420,8 +16644,9 @@ spec:
                   x-kubernetes-validations:
                   - message: Support kinds are core/Service, networking.istio.io/ServiceEntry,
                       gateway.networking.k8s.io/Gateway
-                    rule: '[self.group, self.kind] in [[''core'',''Service''], ['''',''Service''],
-                      [''gateway.networking.k8s.io'',''Gateway''], [''networking.istio.io'',''ServiceEntry'']]'
+                    rule: '[self.group, self.kind] in [["core", "Service"], ["", "Service"],
+                      ["gateway.networking.k8s.io", "Gateway"], ["networking.istio.io",
+                      "ServiceEntry"]]'
                 maxItems: 16
                 type: array
               tracing:
@@ -16494,6 +16719,11 @@ spec:
                       description: Controls span reporting.
                       nullable: true
                       type: boolean
+                    enableIstioTags:
+                      description: Determines whether or not trace spans generated
+                        by Envoy will include Istio specific tags.
+                      nullable: true
+                      type: boolean
                     match:
                       description: Allows tailoring of behavior to specific conditions.
                       properties:
@@ -16536,7 +16766,8 @@ spec:
             type: object
             x-kubernetes-validations:
             - message: only one of targetRefs or selector can be set
-              rule: (has(self.selector)?1:0)+(has(self.targetRef)?1:0)+(has(self.targetRefs)?1:0)<=1
+              rule: '(has(self.selector) ? 1 : 0) + (has(self.targetRef) ? 1 : 0)
+                + (has(self.targetRefs) ? 1 : 0) <= 1'
           status:
             properties:
               conditions:
@@ -16556,6 +16787,12 @@ spec:
                       description: Human-readable message indicating details about
                         last transition.
                       type: string
+                    observedGeneration:
+                      anyOf:
+                      - type: integer
+                      - type: string
+                      description: Resource Generation to which the Condition refers.
+                      x-kubernetes-int-or-string: true
                     reason:
                       description: Unique, one-word, CamelCase reason for the condition's
                         last transition.
@@ -16572,8 +16809,6 @@ spec:
                 anyOf:
                 - type: integer
                 - type: string
-                description: Resource Generation to which the Reconciled Condition
-                  refers.
                 x-kubernetes-int-or-string: true
               validationMessages:
                 description: Includes any errors or warnings detected by Istio's analyzers.
@@ -16753,11 +16988,11 @@ spec:
                               type: object
                               x-kubernetes-validations:
                               - message: value must be set when operation is UPSERT
-                                rule: '((has(self.operation) ? self.operation : '''')
-                                  == ''UPSERT'') ? self.value != '''' : true'
+                                rule: '((has(self.operation) ? self.operation : "")
+                                  == "UPSERT") ? (self.value != "") : true'
                               - message: value must not be set when operation is REMOVE
-                                rule: '((has(self.operation) ? self.operation : '''')
-                                  == ''REMOVE'') ? !has(self.value) : true'
+                                rule: '((has(self.operation) ? self.operation : "")
+                                  == "REMOVE") ? !has(self.value) : true'
                             description: Optional.
                             type: object
                         type: object
@@ -16791,14 +17026,14 @@ spec:
                       type: string
                       x-kubernetes-validations:
                       - message: wildcard not allowed in label value match
-                        rule: '!self.contains(''*'')'
+                        rule: '!self.contains("*")'
                     description: One or more labels that indicate a specific set of
                       pods/VMs on which a policy should be applied.
                     maxProperties: 4096
                     type: object
                     x-kubernetes-validations:
                     - message: wildcard not allowed in label key match
-                      rule: self.all(key, !key.contains('*'))
+                      rule: self.all(key, !key.contains("*"))
                     - message: key must not be empty
                       rule: self.all(key, key.size() != 0)
                 type: object
@@ -16833,8 +17068,9 @@ spec:
                 x-kubernetes-validations:
                 - message: Support kinds are core/Service, networking.istio.io/ServiceEntry,
                     gateway.networking.k8s.io/Gateway
-                  rule: '[self.group, self.kind] in [[''core'',''Service''], ['''',''Service''],
-                    [''gateway.networking.k8s.io'',''Gateway''], [''networking.istio.io'',''ServiceEntry'']]'
+                  rule: '[self.group, self.kind] in [["core", "Service"], ["", "Service"],
+                    ["gateway.networking.k8s.io", "Gateway"], ["networking.istio.io",
+                    "ServiceEntry"]]'
               targetRefs:
                 description: Optional.
                 items:
@@ -16868,8 +17104,9 @@ spec:
                   x-kubernetes-validations:
                   - message: Support kinds are core/Service, networking.istio.io/ServiceEntry,
                       gateway.networking.k8s.io/Gateway
-                    rule: '[self.group, self.kind] in [[''core'',''Service''], ['''',''Service''],
-                      [''gateway.networking.k8s.io'',''Gateway''], [''networking.istio.io'',''ServiceEntry'']]'
+                    rule: '[self.group, self.kind] in [["core", "Service"], ["", "Service"],
+                      ["gateway.networking.k8s.io", "Gateway"], ["networking.istio.io",
+                      "ServiceEntry"]]'
                 maxItems: 16
                 type: array
               tracing:
@@ -16942,6 +17179,11 @@ spec:
                       description: Controls span reporting.
                       nullable: true
                       type: boolean
+                    enableIstioTags:
+                      description: Determines whether or not trace spans generated
+                        by Envoy will include Istio specific tags.
+                      nullable: true
+                      type: boolean
                     match:
                       description: Allows tailoring of behavior to specific conditions.
                       properties:
@@ -16984,7 +17226,8 @@ spec:
             type: object
             x-kubernetes-validations:
             - message: only one of targetRefs or selector can be set
-              rule: (has(self.selector)?1:0)+(has(self.targetRef)?1:0)+(has(self.targetRefs)?1:0)<=1
+              rule: '(has(self.selector) ? 1 : 0) + (has(self.targetRef) ? 1 : 0)
+                + (has(self.targetRefs) ? 1 : 0) <= 1'
           status:
             properties:
               conditions:
@@ -17004,6 +17247,12 @@ spec:
                       description: Human-readable message indicating details about
                         last transition.
                       type: string
+                    observedGeneration:
+                      anyOf:
+                      - type: integer
+                      - type: string
+                      description: Resource Generation to which the Condition refers.
+                      x-kubernetes-int-or-string: true
                     reason:
                       description: Unique, one-word, CamelCase reason for the condition's
                         last transition.
@@ -17020,8 +17269,6 @@ spec:
                 anyOf:
                 - type: integer
                 - type: string
-                description: Resource Generation to which the Reconciled Condition
-                  refers.
                 x-kubernetes-int-or-string: true
               validationMessages:
                 description: Includes any errors or warnings detected by Istio's analyzers.
